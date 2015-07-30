@@ -30,11 +30,15 @@
 typedef unsigned char		UINT8;
 typedef unsigned short		UINT16;
 typedef unsigned int		UINT32;
+#if 0 // GN: not needed in either C:B/MinGW or Visual Studio VC7
 typedef unsigned __int64	UINT64;
+#endif
 typedef signed char 		INT8;
 typedef signed short		INT16;
 typedef signed int			INT32;
+#if 0 // GN: not needed in either C:B/MinGW or Visual Studio VC7
 typedef signed __int64	    INT64;
+#endif
 
 /* Combine to 32-bit integers into a 64-bit integer */
 #define COMBINE_64_32_32(A,B)     ((((UINT64)(A))<<32) | (B))
@@ -135,13 +139,13 @@ typedef union {
 #define HAS_M6309       1
 #define HAS_M6809       1
 #define HAS_KONAMI      1
-#define HAS_M68000      1
-#define HAS_M68010      1
-#define HAS_M68EC020    1
-#define HAS_M68020      1
+#define HAS_M68000      0
+#define HAS_M68010      0
+#define HAS_M68EC020    0
+#define HAS_M68020      0
 #define HAS_T11         1
 #define HAS_S2650       1
-#define HAS_TMS34010    1
+#define HAS_TMS34010    0
 #define HAS_TMS9900     0
 #define HAS_TMS9940     0
 #define HAS_TMS9980     1
@@ -150,10 +154,10 @@ typedef union {
 #define HAS_TMS9995     0
 #define HAS_TMS99105A   0
 #define HAS_TMS99110A   0
-#define HAS_Z8000       1
-#define HAS_TMS320C10   1
-#define HAS_CCPU        1
-#define HAS_ADSP2100    1
+#define HAS_Z8000       0
+#define HAS_TMS320C10   0
+#define HAS_CCPU        0
+#define HAS_ADSP2100    0
 #define HAS_PDP1        0
 
 #endif  /* !NEOMAME */
