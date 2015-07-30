@@ -228,7 +228,7 @@ int ZipFile(char *zipfile, char *file)
     zcl.argc = 1;
     zcl.lpszZipFN = zipfile;
     zcl.FNV = flist;
-
+#ifndef __GNUC__
     /* windll_zip() will crash if the zipfile is read only or zero size. */
     __try
     {
@@ -238,7 +238,9 @@ int ZipFile(char *zipfile, char *file)
     {
         return -1;
     }
-
+#else // GN: (C:B/MinGW) "GCC does not support SEH yet"
+        nResult = windll_zip(zcl);
+#endif
     return nResult;
 }
 

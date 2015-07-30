@@ -37,7 +37,7 @@ BOOL GetScreenShotRect(HWND hWnd, RECT *pRect, BOOL restrict);
 BOOL ScreenShotLoaded(void);
 
 BOOL    LoadDIB(LPCTSTR filename, HGLOBAL *phDIB, HPALETTE *pPal, BOOL flyer);
-BOOL    DrawDIB(HWND hWnd, HDC hDC, HGLOBAL hDIB, HPALETTE hPal);
+static BOOL DrawDIB(HWND hWnd, HDC hDC, HGLOBAL hDIB, HPALETTE hPal);
 HBITMAP DIBToDDB(HDC hDC, HANDLE hDIB, LPMYBITMAPINFO desc);
 
 #endif
