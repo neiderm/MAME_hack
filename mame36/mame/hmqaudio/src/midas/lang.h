@@ -16,6 +16,9 @@
 #ifndef __LANG_H
 #define __LANG_H
 
+#ifdef __GNUC__
+#include <windef.h> // GN: (C:B/MinGW) force define __cdecl (thru windows.h)
+#endif
 
 #if defined(__WATCOMC__) || defined(__WC32__)
     #define __WC32__
@@ -40,7 +43,11 @@
 #else
 #if defined(_MSC_VER) || defined(__VC32__)
     #define __VC32__
+#ifdef __GNUC__
+    #define CALLING WINAPIV // GN: (C:B/MinGW) seems to be only way to get __cdecl
+#else
     #define CALLING cdecl
+#endif
     #define GLOBALVAR
     #define __C__
     #define __PROTMODE__
@@ -142,7 +149,9 @@
 #define RCSID(x) x
 
 #ifndef __HPUX__
+#ifndef __GNUC__ // GN: (C:B/MinGW) not using NASM
 #define M_X86_ASSEMBLER
+#endif
 #endif
 
 /* Black magic */

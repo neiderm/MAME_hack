@@ -162,6 +162,7 @@ static int tempInt;
 
 __inline void StoreFloatInt(float f, int *dest)
 {
+#ifndef __GNUC__ // GN: (C:B/MinGW)
     __asm
         {
             mov eax,dest
@@ -170,6 +171,7 @@ __inline void StoreFloatInt(float f, int *dest)
             mov edx,tempInt
             mov [eax],edx
         }
+#endif
 }
 
 #else

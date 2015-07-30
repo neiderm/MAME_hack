@@ -139,9 +139,12 @@ static uchar dsmSampleClearValue(int sampleType)
     return 128;
 }
 
-
+#ifndef __GNUC__
 extern int CALLING mCpuIsPPro(void);
+#else
 
+#define mCpuIsPPro() 0 // GN: (C:B/MinGW) not using NASM
+#endif
 
 /****************************************************************************\
 *

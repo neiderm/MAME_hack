@@ -12,6 +12,9 @@
  * modify or distribute this file you indicate that you have
  * read the license and understand and accept it fully.
 */
+#ifdef __GNUC__
+#include <windows.h> // GN: (C:B/MinGW) force CRITICAL_SECTION to be defined
+#endif
 
 #if defined(__WATCOMC__)|| defined(_MSC_VER)
 #define WIN32_LEAN_AND_MEAN
