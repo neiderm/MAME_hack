@@ -149,7 +149,7 @@
 #define RCSID(x) x
 
 #ifndef __HPUX__
-#ifndef __GNUC__ // GN: (C:B/MinGW) not using NASM
+#ifdef USE_NASM // GN: not using NASM
 #define M_X86_ASSEMBLER
 #endif
 #endif

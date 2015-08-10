@@ -139,7 +139,7 @@ static uchar dsmSampleClearValue(int sampleType)
     return 128;
 }
 
-#ifndef __GNUC__
+#ifdef USE_NASM 
 extern int CALLING mCpuIsPPro(void);
 #else
 
@@ -165,7 +165,7 @@ int CALLING dsmInit(unsigned mixRate, unsigned mode)
     static uchar *tempUlaw;
     static short *tempRaw;
     unsigned    n;
-    
+
 
     if ( !(mode & (dsmMixInteger | dsmMixFloat)) )
     {
@@ -214,7 +214,7 @@ int CALLING dsmInit(unsigned mixRate, unsigned mode)
         else
             dsmMixBufferSize = sizeof(float) * mixRate / MIXBUFLEN;
     }
-        
+
     /* Round up mixing buffer size to nearest paragraph: */
     dsmMixBufferSize = (dsmMixBufferSize + 15) & 0xFFFFFFF0;
 
@@ -263,19 +263,19 @@ int CALLING dsmInit(unsigned mixRate, unsigned mode)
 
         dsmByteFloatTable = (float*) ((((unsigned) dsmByteFloatTableMem)
                                        + 1023) & (~1023));
-        
+
         for ( i = 0; i < 256; i++ )
             dsmByteFloatTable[i] = (float) (256 * (i-128));
 
-        
+
         /* Allocate and initialize sample u-law->float conversion table: */
         if ( (error = memAlloc(1024 + 256 * sizeof(float), (void**)
                                &dsmUlawFloatTableMem)) != OK )
             PASSERROR(ID_dsmInit);
-        
+
         dsmUlawFloatTable = (float*) ((((unsigned) dsmUlawFloatTableMem)
                                        + 1023) & (~1023));
-        
+
         if ( (error = memAlloc(256, (void**) &tempUlaw)) != OK )
             PASSERROR(ID_dsmInit);
         if ( (error = memAlloc(256 * sizeof(short), (void**) &tempRaw)) != OK )
@@ -296,12 +296,12 @@ int CALLING dsmInit(unsigned mixRate, unsigned mode)
     if ( dsmMode & dsmMixInterpolation )
     {
         mixInterpolate = 1;
-        if ( dsmMode & dsmMixMono )      
+        if ( dsmMode & dsmMixMono )
             dsmActMixRoutines = &dsmMixMonoFloatInterp;
         else
             dsmActMixRoutines = &dsmMixStereoFloatInterp;
     }
-    else            
+    else
     {
         mixInterpolate = 0;
         if ( dsmMode & dsmMixMono )
@@ -515,7 +515,7 @@ int CALLING dsmOpenChannels(unsigned channels)
         dsmAllocatedChannels = 2 * dsmNumChannels;
     else
         dsmAllocatedChannels = dsmNumChannels;
-    
+
     dsmNumChannels = channels;
     dsmMuted = 0;                       /* not muted */
     dsmPaused = 0;                      /* not paused */
@@ -525,7 +525,7 @@ int CALLING dsmOpenChannels(unsigned channels)
         &dsmChannels)) != OK )
         PASSERROR(ID_dsmOpenChannels);
 
-    
+
     /* Set default amplification level and calculate volume table: */
     if ( channels < 5 )
     {
@@ -537,7 +537,7 @@ int CALLING dsmOpenChannels(unsigned channels)
         if ( (error = dsmSetAmplification(14*channels)) != OK )
             PASSERROR(ID_dsmOpenChannels);
     }
-    
+
     /* Clear all channels: */
     if ( (error = dsmClearChannels()) != OK )
         PASSERROR(ID_dsmOpenChannels);
@@ -785,7 +785,7 @@ static void dsmSetChannelVolume(dsmChannel *chan, unsigned rampSpeed)
         chan->volumeRamping = 0;
         chan->leftVol = chan->leftVolTarget = leftVol;
         chan->rightVol = chan->rightVolTarget = rightVol;
-    }               
+    }
 }
 
 
@@ -1047,13 +1047,13 @@ int CALLING dsmFadeOut(unsigned channel)
     chan = &dsmChannels[channel];
     destChan = &dsmChannels[dsmNumChannels + channel];
 
-    if ( (chan->status == dsmChanStopped) || (chan->status == dsmChanEnd) || 
+    if ( (chan->status == dsmChanStopped) || (chan->status == dsmChanEnd) ||
          ((chan->leftVol == 0) && (chan->rightVol == 0)) )
         return OK;
 
     if ( destChan->status == dsmChanFadeOut )
         return OK;
-    
+
     destChan->status = dsmChanFadeOut;
 
     /* Copy the channel information, and make sure half-ready channel data
@@ -1068,7 +1068,7 @@ int CALLING dsmFadeOut(unsigned channel)
     destChan->status = dsmChanFadeOut;
     dsmSetChannelVolume(destChan, RAMPSPEED);
     destChan->volumeRamping = 1;
-    
+
     return OK;
 }
 
@@ -1097,7 +1097,7 @@ int CALLING dsmFadeIn(unsigned channel)
     /* Don't do anything if we don't have fadeout channels */
     if ( (dsmNumChannels + channel) >= dsmAllocatedChannels )
         return OK;
-    
+
     chan = &dsmChannels[channel];
     fadeChan = &dsmChannels[dsmNumChannels + channel];
 
@@ -1108,7 +1108,7 @@ int CALLING dsmFadeIn(unsigned channel)
     chan->leftVol = 0;
     chan->rightVol = 0;
     dsmSetChannelVolume(chan, RAMPSPEED);
-    
+
     return OK;
 }
 
@@ -1226,7 +1226,7 @@ int CALLING dsmReleaseSound(unsigned channel)
 int CALLING dsmStopSound(unsigned channel)
 {
     int error;
-    
+
     /* Check that the channel number is legal and channels are open: */
     if ( channel >= dsmNumChannels )
     {
@@ -1804,7 +1804,7 @@ int CALLING dsmSetPanning(unsigned channel, int panning)
     /* Set panning position to channel: */
     dsmChannels[channel].panning = panning;
 
-    dsmSetChannelVolume(&dsmChannels[channel], RAMPSPEED);    
+    dsmSetChannelVolume(&dsmChannels[channel], RAMPSPEED);
 
     return OK;
 }
@@ -1869,7 +1869,7 @@ int CALLING dsmMuteChannel(unsigned channel, int mute)
     dsmChannels[channel].muted = mute;
 
     dsmSetChannelVolume(&dsmChannels[channel], RAMPSPEED);
-    
+
     return OK;
 }
 
@@ -1982,7 +1982,7 @@ int CALLING dsmAddSample(sdSample *sample, int copySample, unsigned
         {
             ulawConvert = 0;
         }
-        
+
         if ( copySample )
         {
             /* Sample data should be copied elsewhere in memory */
@@ -1993,9 +1993,9 @@ int CALLING dsmAddSample(sdSample *sample, int copySample, unsigned
 
             /* Allocate memory for sample: */
             if ( (error = memAlloc(destLength, (void**) &dsmSmp->sample))
-                 != OK )                    
+                 != OK )
                 PASSERROR(ID_dsmAddSample);
-                        
+
 
             copyDest = dsmSmp->sample;
 
@@ -2313,7 +2313,7 @@ int CALLING dsmAddPostProcessor(dsmPostProcessor *postProc, unsigned procPos,
 
     switch ( procPos )
     {
-        case dsmPostProcFirst:          
+        case dsmPostProcFirst:
             postProc->prev = dsmPostProcList;
             postProc->next = dsmPostProcList->next;
             dsmPostProcList->next->prev = postProc;
