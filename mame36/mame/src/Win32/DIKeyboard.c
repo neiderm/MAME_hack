@@ -336,6 +336,11 @@ static int DIKeyboard_wait_keypress(void)
 
 BOOL DIKeyboard_Available(void)
 {
+#if DIRECTINPUT_VERSION >= 0x800 //GN:
+	int didevtype_keyboard = DI8DEVCLASS_KEYBOARD;
+#else
+	int didevtype_keyboard = DIDEVTYPE_KEYBOARD;
+#endif
     HRESULT     hr;
     GUID        guidNULL = {0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
     GUID        guidDevice = guidNULL;
@@ -346,7 +351,7 @@ BOOL DIKeyboard_Available(void)
     }
 
     /* enumerate for keyboard devices */
-    hr = IDirectInput_EnumDevices(di, DIDEVTYPE_KEYBOARD,
+    hr = IDirectInput_EnumDevices(di, didevtype_keyboard,
                  (LPDIENUMDEVICESCALLBACK)inputEnumDeviceProc,
                  &guidDevice,
                  DIEDFL_ATTACHEDONLY);

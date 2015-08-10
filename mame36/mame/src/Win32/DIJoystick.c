@@ -199,6 +199,11 @@ static struct JoystickInfo      joylist[256] =
 */
 static int DIJoystick_init(options_type *options)
 {
+#if DIRECTINPUT_VERSION >= 0x800 //GN:
+	int didevtype_joystick = DI8DEVCLASS_GAMECTRL;
+#else
+	int didevtype_joystick = DIDEVTYPE_JOYSTICK;
+#endif
     DWORD             i;
     HRESULT         hr;
 
@@ -216,7 +221,7 @@ static int DIJoystick_init(options_type *options)
     }
 
     /* enumerate for joystick devices */
-    hr = IDirectInput_EnumDevices(di, DIDEVTYPE_JOYSTICK,
+    hr = IDirectInput_EnumDevices(di, didevtype_joystick,
                  (LPDIENUMDEVICESCALLBACK)DIJoystick_EnumDeviceProc,
                  NULL,
                  DIEDFL_ALLDEVICES);
@@ -540,6 +545,11 @@ static int DIJoystick_standard_analog_read(int player, int axis)
 
 static BOOL DIJoystick_Available(int nJoyStick)
 {
+#if DIRECTINPUT_VERSION >= 0x800 //GN:
+	int didevtype_joystick = DI8DEVCLASS_GAMECTRL;
+#else
+	int didevtype_joystick = DIDEVTYPE_JOYSTICK;
+#endif
     static BOOL bBeenHere = FALSE;
     static BOOL bAvailable = FALSE;
     HRESULT     hr;
@@ -558,7 +568,7 @@ static BOOL DIJoystick_Available(int nJoyStick)
         return bAvailable;
 
     /* enumerate for joystick devices */
-    hr = IDirectInput_EnumDevices(di, DIDEVTYPE_JOYSTICK,
+    hr = IDirectInput_EnumDevices(di, didevtype_joystick,
                  (LPDIENUMDEVICESCALLBACK)inputEnumDeviceProc,
                  &guidDevice,
                  DIEDFL_ALLDEVICES);
