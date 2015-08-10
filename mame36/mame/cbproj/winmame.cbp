@@ -802,6 +802,9 @@
 		<Unit filename="../src/win32ce/sound/sndintrf.h" />
 		<Unit filename="../src/win32ce/unzip.h" />
 		<Unit filename="../src/win32ce/win32.h" />
+		<Unit filename="../src/winlite/winmain.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../zlib/adler32.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -833,12 +836,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../zlib/zutil.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="stubs.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="winmain.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
