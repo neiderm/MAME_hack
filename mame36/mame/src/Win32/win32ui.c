@@ -1539,7 +1539,7 @@ static BOOL GameCheck(void)
 {
 
     LV_FINDINFO lvfi;
-    int         i;
+    int         i = 0;
     BOOL        success;
     BOOL        changed = FALSE;
 
