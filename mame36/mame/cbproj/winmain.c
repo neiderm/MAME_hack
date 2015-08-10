@@ -77,7 +77,7 @@ options_type * GetPlayingGameOptions()
 
 char * romdirs     = ".;roms";
 char * sampledirs  = ".;samples";
-
+char * cfgdirs     = "cfg";
 
 const char* GetRomDirs(void)
 {
@@ -91,7 +91,7 @@ const char* GetSampleDirs(void)
 
 const char* GetCfgDir(void)
 {
-    return 0; // cfgdir;
+    return cfgdirs;
 }
 
 const char* GetHiDir(void)
