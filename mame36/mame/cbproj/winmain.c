@@ -2,9 +2,9 @@
 
 #include <windows.h>
 
-//#include "mame32.h" // options.h
 #include "options.h"
-#include "file.h"
+#include "win32/file.h" /* OSDFile File ... path it to avoid filename conflict
+                           in hmqaudio */
 
 
 /***************************************************************************
@@ -32,19 +32,19 @@ int WINAPI WinMain(HINSTANCE    hInstance,
 
     playing_game_options.is_window = 1;
     playing_game_options.gamma = 1.0;
-    playing_game_options.brightness = 100; 
+    playing_game_options.brightness = 100;
     playing_game_options.sound = 1;
     playing_game_options.sample_rate = 22050;
     playing_game_options.has_roms = 1;
 
 /*
- in "run_game()", a bunch of global options are copied to Machine e.g. 
+ in "run_game()", a bunch of global options are copied to Machine e.g.
 
         Machne->sample_rate = options.samplerate;
 
  ... before osd_init(), see 'assert(Machine->sample_rate != 0)' in MidasSound_update_audio_stream()
 */
-    options.samplerate  = playing_game_options.sample_rate; // in mame::options 
+    options.samplerate  = playing_game_options.sample_rate; // in mame::options
 
     run_game(0); // index
 
@@ -63,7 +63,7 @@ int UpdateLoadProgress(const char* name, int current, int total)
   "MAME32App_init(options)" etc. etc.
  The object "GameOptions mame_options" declared in 'mame.h' and referenced globally numerous core modules:
  primarily usrintrf, mame, but also intport, common, snd/3812intf
-*/ 
+*/
 options_type * GetPlayingGameOptions()
 {
     return &playing_game_options;
