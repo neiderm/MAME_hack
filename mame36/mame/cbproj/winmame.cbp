@@ -35,7 +35,7 @@
 			<Add option="-DVERSION=36" />
 			<Add option="-DTINY_COMPILE" />
 			<Add option="-DTINY_NAME=driver_galaga" />
-			<Add option="-DINLINE=static" />
+			<Add option='-DINLINE=&quot;static __inline__&quot;' />
 			<Add option="-DCLIB_DECL=__cdecl" />
 			<Add option="-D__VC32__" />
 			<Add option="-D__WIN32__" />
@@ -249,6 +249,9 @@
 		<Unit filename="../src/Z80/Z80DAA.h" />
 		<Unit filename="../src/Z80/Z80Dasm.h" />
 		<Unit filename="../src/Z80/Z80IO.h" />
+		<Unit filename="../src/artwork.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../src/cheat.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -651,6 +654,9 @@
 		<Unit filename="../src/vidhrdw/arabian.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../src/vidhrdw/avgdvg.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../src/vidhrdw/bagman.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -764,6 +770,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../src/vidhrdw/timeplt.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../src/vidhrdw/vector.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="../src/vidhrdw/vector.h" />
