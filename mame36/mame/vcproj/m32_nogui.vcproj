@@ -339,9 +339,6 @@
 				RelativePath="..\src\state.h">
 			</File>
 			<File
-				RelativePath=".\stubs.c">
-			</File>
-			<File
 				RelativePath="..\src\tilemap.c">
 			</File>
 			<File
@@ -381,7 +378,7 @@
 				RelativePath="..\src\window.h">
 			</File>
 			<File
-				RelativePath=".\winmain.c">
+				RelativePath="..\src\winlite\winmain.c">
 			</File>
 			<File
 				RelativePath="..\zlib\zutil.c">
