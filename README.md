@@ -1,0 +1,3 @@
+# MAME_hack
+Various modifications of old MAME32 project to build with Code::Blocks.
+More to come ...
