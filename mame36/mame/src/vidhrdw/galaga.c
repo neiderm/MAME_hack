@@ -195,7 +195,11 @@ void galaga_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	/* since last time and update it accordingly. */
 	for (offs = videoram_size - 1;offs >= 0;offs--)
 	{
+#if defined(SIM)
+		if (1)
+#else
 		if (dirtybuffer[offs])
+#endif
 		{
 			int sx,sy,mx,my;
 

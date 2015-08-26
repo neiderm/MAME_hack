@@ -793,9 +793,11 @@ int run_machine(void)
 						(*drv->nvram_handler)(f,0);
 						if (f) osd_fclose(f);
 					}
-
+#ifndef SIM
 					cpu_run();      /* run the emulation! */
-
+#else
+					sim_run(Machine->drv); /* run C code in simulated machine environment */
+#endif
 					if (drv->nvram_handler)
 					{
 						void *f;

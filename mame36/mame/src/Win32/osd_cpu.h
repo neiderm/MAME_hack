@@ -104,6 +104,10 @@ typedef union {
 
 #else
 
+#ifdef SIM
+#define HAS_Z80         1
+#else
+
 /* CPUs available */
 #define HAS_Z80         1
 #define HAS_Z80GB       0
@@ -160,6 +164,7 @@ typedef union {
 #define HAS_ADSP2100    0
 #define HAS_PDP1        0
 
+#endif  /* SIM */
 #endif  /* !NEOMAME */
 #endif  /* !HAS_CPUS */
 
@@ -170,6 +175,11 @@ typedef union {
 
 #define HAS_YM2610      1
 
+#else
+
+#ifdef SIM
+#define HAS_SAMPLES     1
+#define HAS_NAMCO       1
 #else
 
 /* Sound systems */
@@ -216,7 +226,7 @@ typedef union {
 #define HAS_SPEAKER     0
 #define HAS_WAVE        0
 
-
+#endif  /* SIM */
 #endif  /* !NEOMAME */
 #endif  /* !HAS_SOUND */
 
