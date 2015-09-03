@@ -796,7 +796,7 @@ int run_machine(void)
 #ifndef SIM
 					cpu_run();      /* run the emulation! */
 #else
-					sim_run(Machine->drv); /* run C code in simulated machine environment */
+					sim_run((int)Machine->drv->frames_per_second); /* run C code in simulated machine environment */
 #endif
 					if (drv->nvram_handler)
 					{
