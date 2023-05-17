@@ -1,0 +1,31 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iMame2010", "mame32ce.vcxproj", "{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Mini Debug|Win32 = Mini Debug|Win32
+		Release|Win32 = Release|Win32
+		ReleaseAxp|Win32 = ReleaseAxp|Win32
+		ReleaseWithoutAsm|Win32 = ReleaseWithoutAsm|Win32
+		ReleaseWithoutCrtdll|Win32 = ReleaseWithoutCrtdll|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Debug|Win32.Build.0 = Debug|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Mini Debug|Win32.ActiveCfg = Debug|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Mini Debug|Win32.Build.0 = Debug|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Release|Win32.ActiveCfg = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.Release|Win32.Build.0 = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseAxp|Win32.ActiveCfg = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseAxp|Win32.Build.0 = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseWithoutAsm|Win32.ActiveCfg = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseWithoutAsm|Win32.Build.0 = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseWithoutCrtdll|Win32.ActiveCfg = Release|Win32
+		{ADE37D8C-D62B-4EAE-BA0B-5A08B739E464}.ReleaseWithoutCrtdll|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
