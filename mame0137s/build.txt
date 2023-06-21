@@ -1,5 +1,0 @@
-
-# mame0137s is presently only known to build in xubuntu 14.04 environment
-#VERSION="14.04.6 LTS, Trusty Tahr"
-
-make AMD64=1 DEBUG=1 PTR64=1 NOWERROR=1
