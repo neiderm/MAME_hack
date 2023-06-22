@@ -1,21 +1,12 @@
-diff -Naur xmame-0.79.1.org/src/cpuintrf.c xmame-0.79.1/src/cpuintrf.c
---- xmame-0.79.1.org/src/cpuintrf.c	2004-02-19 21:43:45.000000000 -0500
-+++ xmame-0.79.1/src/cpuintrf.c	2023-06-21 15:05:40.000000000 -0400
-@@ -314,7 +314,7 @@
-  *
-  *************************************/
- 
--struct cpu_interface cpuintrf[CPU_COUNT];
-+/* const */ struct cpu_interface cpuintrf[CPU_COUNT];
- 
- const struct
- {
 diff -Naur xmame-0.79.1.org/src/cpuintrf.h xmame-0.79.1/src/cpuintrf.h
 --- xmame-0.79.1.org/src/cpuintrf.h	2004-02-19 21:43:45.000000000 -0500
-+++ xmame-0.79.1/src/cpuintrf.h	2023-06-21 15:55:16.690824434 -0400
-@@ -565,7 +565,7 @@
++++ xmame-0.79.1/src/cpuintrf.h	2023-06-21 21:55:44.063817011 -0400
+@@ -563,9 +563,9 @@
+  *************************************/
+ 
  /* return a pointer to the interface struct for a given CPU type */
- INLINE const struct cpu_interface *cputype_get_interface(int cputype)
+-INLINE const struct cpu_interface *cputype_get_interface(int cputype)
++INLINE /* const */ struct cpu_interface *cputype_get_interface(int cputype)
  {
 -	extern const struct cpu_interface cpuintrf[];
 +	extern /* const */ struct cpu_interface cpuintrf[];
@@ -24,7 +15,7 @@ diff -Naur xmame-0.79.1.org/src/cpuintrf.h xmame-0.79.1/src/cpuintrf.h
  
 diff -Naur xmame-0.79.1.org/src/driver.c xmame-0.79.1/src/driver.c
 --- xmame-0.79.1.org/src/driver.c	2004-02-04 22:02:52.000000000 -0500
-+++ xmame-0.79.1/src/driver.c	2023-06-21 15:56:16.181978859 -0400
++++ xmame-0.79.1/src/driver.c	2023-06-21 21:29:00.979788669 -0400
 @@ -36,7 +36,7 @@
  
  #endif
@@ -63,13 +54,13 @@ diff -Naur xmame-0.79.1.org/src/driver.c xmame-0.79.1/src/driver.c
  	DRIVER( bangbead )	/* 0259 (c) 2000 Visco */
  	DRIVER( nitd )		/* 0260 (c) 2000 Eleven / Gavaking */
 -
-+#endif /* todo fix TINY_COMPILE */
++#endif /* fix TINY_COMPILE */
  
  #endif	/* DRIVER_RECURSIVE */
  
 diff -Naur xmame-0.79.1.org/src/drivers/pacman.c xmame-0.79.1/src/drivers/pacman.c
 --- xmame-0.79.1.org/src/drivers/pacman.c	2004-02-04 22:02:48.000000000 -0500
-+++ xmame-0.79.1/src/drivers/pacman.c	2023-06-21 15:57:37.174724205 -0400
++++ xmame-0.79.1/src/drivers/pacman.c	2023-06-21 21:24:52.264731891 -0400
 @@ -4378,8 +4378,8 @@
  GAME( 1983, gorkans,  mrtnt,    pacman,   mrtnt,    0,        ROT90,  "Techstar", "Gorkans" )
  GAMEX(1983, eggor,    0,        pacman,   mrtnt,    eyes,     ROT90,  "Telko", "Eggor", GAME_WRONG_COLORS | GAME_IMPERFECT_SOUND  )
@@ -90,13 +81,13 @@ diff -Naur xmame-0.79.1.org/src/drivers/pacman.c xmame-0.79.1/src/drivers/pacman
  GAMEX(1985, porky,	  0,        porky,	  porky,	porky,    ROT90,  "Shinkai Inc. (Magic Eletronics Inc. licence)", "Porky", GAME_NO_SOUND )
 diff -Naur xmame-0.79.1.org/src/unix/video-drivers/x11_window.c xmame-0.79.1/src/unix/video-drivers/x11_window.c
 --- xmame-0.79.1.org/src/unix/video-drivers/x11_window.c	2004-02-14 14:11:56.000000000 -0500
-+++ xmame-0.79.1/src/unix/video-drivers/x11_window.c	2023-06-21 15:54:08.775672745 -0400
++++ xmame-0.79.1/src/unix/video-drivers/x11_window.c	2023-06-21 21:26:01.324080444 -0400
 @@ -368,14 +368,14 @@
  {
     XVisualInfo visualinfo;
     int screen_no = DefaultScreen (display);
 -
-+#if 1 /* black regions become transparent (VirtualBox Xubuntu 14.04 and later)
++#if 1 /* black regions become transparent (VirtualBox Xubuntu 14.04 and later) */
     if (XMatchVisualInfo (display, screen_no, 32, TrueColor, &visualinfo))
     {
        xvisual = visualinfo.visual;
