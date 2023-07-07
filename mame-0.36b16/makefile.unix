@@ -1,0 +1,582 @@
+##############################################################################
+#
+# makefile for xmame/xmess
+#
+# original by Juan Antonio Martinez
+# current version by Hans de Goede
+# http://x.mame.net
+# mailto:hans@highrise.nl
+#
+##############################################################################
+
+VERSION = 0.36.1
+DATE    = 24 March 2000
+
+#########################################################################
+#									#
+# READ COMMENTS AND MODIFY CONFIGURABLE OPTIONS WITH CARE...		#
+#									#
+# Members of Mame and X-Mame project assumes no responsability  	#
+# implicit or explicit about illegal or incorrect use of this   	#
+# sofware and about possible hard/soft damage derived of it   	  	#
+#									#
+# THIS SOFTWARE IS DISTRIBUTED "AS IS" . USE AT YOUR OWN RISK		#
+#									#
+# Mame and X-Mame are Copyright of Nicola Salmoria and Mirko buffoni	#
+# and distributed under terms simular to the GNU General Public License #
+# see doc/readme.unix for more details                                  #
+#									#
+# Arcade ROM images are copyright of their authors. DISTRIBUTING MAME   #
+# OR X-MAME INCLUDING ROM IMAGES IN THE SAME PACKAGE IS ILLEGAL AND	#
+# CONSTITUTES A VIOLATION OF TERMS OF COPYRIGHT				#
+#									#
+#########################################################################
+
+##############################################################################
+# xmame or xmess ?
+##############################################################################
+
+#set name to "xmame" (without the ") to compile xmame and to "xmess" to
+#compile xmess.
+NAME = xmame
+
+
+##############################################################################
+# *** development environment options 
+##############################################################################
+
+# GNU MAKE is MANDATORY !!!
+
+# *** Choose your compiler
+# Use gcc if available
+CC	= gcc
+# otherwise try the default cc
+# CC    = cc
+# Use of `c89' is recommend for ultrix as it generates faster code (which
+# means less frames to be skipped and better graphics) but `gcc' works just
+# as well. However, stay away from the `cc' ultrix compiler if possible.
+# CC	= c89
+# for ansi compliance testing, only for developers !!
+
+# *** Choose your compiler flags.
+# Note1:
+# xmame compilation breaks when using egcs-1.1.x or gcc-2.95, use
+# -fno-strict-aliasing to fix it. gcc-2.95.1 does work with -fstrict-aliasing,
+# and gives a nice speed increase.
+#
+# Note2:
+# linux-powerpc needs -fsigned-char
+#
+# Note3:
+# next/macosx needs -traditional-cpp
+#
+### for normal optimalisation, full warnings
+CFLAGS    = -O -Wall
+### this should work with all compilers 
+# CFLAGS    =
+### to get full optimization under gcc/x Intel based OS's..
+# CFLAGS    = -O3 -m486 -Wall -Wno-unused -funroll-loops \
+#  -fstrength-reduce -fomit-frame-pointer -ffast-math -malign-functions=2 \
+#  -malign-jumps=2 -malign-loops=2
+### for Linux/PowerPC use following opts
+# CFLAGS    = -O3 -Wall  -Wno-unused -funroll-loops\
+#  -fstrength-reduce -fomit-frame-pointer -ffast-math -fsigned-char
+### for OpenStep/MacOS X use following opts
+# CFLAGS    = -O4 -Wall -Wno-unused -finline-functions -ffast-math \
+#  -fstrength-reduce -traditional-cpp
+### for IRIX with all optimization
+# CFLAGS    = -O2 -OPT:Olimit=3077
+### used by me, for full ansi testing and debugging (with gcc).
+# CFLAGS    = -ggdb -ansi -pedantic -D_XOPEN_SOURCE -D_BSD_SOURCE -Wall \
+#  -Wno-long-long -Wno-trigraphs -Wno-unused -Dasm=__asm__ -O3 -m486 \
+#  -fstrength-reduce -ffast-math -malign-functions=2 -malign-jumps=2 \
+#  -malign-loops=2
+
+# *** Does your compiler supports inline funcs?. use appropiate item:
+# do not use IL = inline : wont work due to Z80 and 6809 stuffs
+# if strict ansi used set IL to "static"
+# This can very noticably increase xmame's performance, so enabling this is
+# encouraged, it works fine with gcc and probably with most other compilers.
+# IL	= '-DINLINE=static inline'
+IL     = -DINLINE=static
+
+# *** Choose your linker & linker flags ( some OS's needs native linker
+# instead GNU one )
+# normal
+LD	= $(CC) -s
+# to profile with gcc and gprof
+# LD	= $(CC) -pg
+# no profiling (less strace output), but with debug info
+# LD	= $(CC)
+# for debugging only, only works with gnu-binutils !!
+# LD	= $(CC) -Wl,-warn-common
+
+# *** Does your platform have ranlib (leave this untouched unless you are
+# using irix or Unixware 7
+RANLIB = ranlib
+# RANLIB = true
+
+# *** How to install executable? ( some OS's doesn't support install command )
+INSTALL = cp
+
+# *** Extra include and or library paths, sometimes needed for zlib,
+# with suse linux -L/usr/X11R6/lib is needed for example,
+# and with unixware7 -lsocket is needed
+# LIBS     = -L/usr/X11R6/lib -L/usr/local/lib
+# INCLUDES = -I/usr/X11R6/include -I/usr/local/include
+
+# *** If your system doesn't have zlib, or your systems zlib is giving you
+# troubles, you can use the one distributed with xmame.
+# Uncomment the following lines to use xmame's own version of zlib
+# ZLIB          = contrib/cutzlib-1.1.3/libz.a
+# ZLIB_LIBS     = -Lcontrib/cutzlib-1.1.3
+# ZLIB_INCLUDES = -Icontrib/cutzlib-1.1.3 -I../../contrib/cutzlib-1.1.3
+
+# *** Does your system support gettimeofday() function? If so, we encourage
+# you to enable this feature . Else .... comment it :-(
+TD	= -DHAVE_GETTIMEOFDAY
+
+
+##############################################################################
+# *** Configuration files and directories
+##############################################################################
+
+# *** Select destination directory for your compiled program , manual page
+# and binary distribution ( if you want to... )
+# ( only needed to install, not to compile... )
+DESTDIR = /usr/games
+MANDIR  = /usr/local/man/man6
+DISTDIR = /home/ftp/pub/emulators/$(NAME)
+
+# *** xmameroot, this is the default rompath, place where the highscores are
+# stored, global rc location etc. Since most of these are configurable through
+# the rc-file anyway, there are no longer seperate defines for each.
+XMAMEROOT = /usr/games/lib/$(NAME)
+
+
+##############################################################################
+# *** Special features
+##############################################################################
+
+# *** Uncomment this if you want network-play! see doc/multiplayer-readme.txt
+# It doesn't work correctly under all circumstances yet, it can't hurt
+# to enable it though, it won't matter for normal games. But don't expect
+# network play to work perfect. I'll work on that though, I should have taken
+# the time to test this earlier ;)
+#
+# The dos boys are working on some kind of net support in the core,
+# so this is currently broken ;|
+# MAMENET = -DMAME_NET
+
+# *** Uncommenty the next lines to build xmame with build in debugger, only
+# supported for x11 and svgalib. Only enable this if you need it, if you 
+# want to develop drivers that is, since it slows down xmame concederably.
+# DEBUG     = -DMAME_DEBUG
+# DEBUGLIBS = -lcurses
+
+# *** Uncomment the next lines to use x86-asm cpu cores. This is only
+# supported for some 386 machines with nasm-0.96 or higher available in your
+# path! the asm 68k core could cause problem with certain games, please test
+# with the c-core before reporting any problems.
+# uncomment next line to use Assembler 68k engine
+# X86_ASM_68K = 1
+#
+# And choose elf / or aout
+# ELF settings: no leading underscores + elf object format Tested with
+# linux/i386. Also for e.g. Solaris/x86
+ASM_STRIP = contrib/porting/strip_
+NASM_FMT  = -f elf
+# aout settings: with leading underscores + aout object format. Tested with
+# netBSD i386. Also for older linux installs, freebsd and others.
+# ASM_STRIP = true  # no strip command
+# NASM_FMT  = -f aoutb
+
+# *** Comment this line to get verbose make output, for debugging build
+# problems
+QUIET = 1
+
+
+##############################################################################
+# *** Input Devices
+##############################################################################
+
+# *** Select one or more joystick types which you want to use, which one is
+# actually used can be selected runtime with the -joytype switch.
+
+# *** for using X Input Extensions based joystick
+# This is known to not work right now ;|
+# ( Recommended if available. Of course: doesn't work in SVGALib arch ...)
+# You should also declare a default name for input device.
+# and choose polling method ( event processing or device polling )
+# use provided program "xlistdev" to now available ones
+# and dont forget to include library in linker definition !!
+# JSX11	 = -DX11_JOYSTICK
+# JSNAME = \"Joystick\"
+# JSPOLL  = -DUSE_X11_JOYEVENTS
+# JSLIB   = -lXi
+
+# *** On iX86 based OS's, if supported, you can use standard joystick driver
+# JSI386 = -DI386_JOYSTICK
+
+# *** Linux FM-TOWNS game PAD joystick emulation support
+# Thanks to Osamu Kurati for provided patch
+# JSPAD	 = -DLIN_FM_TOWNS
+
+
+##############################################################################
+# *** Sound Devices
+##############################################################################
+
+# select one or more sound drivers you want to exclude, besided the native
+# sound driver for your system
+
+# uncomment the following 2 lines for esound support
+# ESOUND_CFLAGS = -DSYSDEP_DSP_ESOUND `esd-config --cflags`
+# ESOUND_LIBS = `esd-config --libs`
+
+
+##############################################################################
+# *** Select your display method, choose only one
+# note: x11 is the only one supported on all platforms
+##############################################################################
+
+### X11
+DISPLAY_METHOD = x11
+### svgalib, only supported under linux
+# DISPLAY_METHOD = svgalib
+### ggi, only tested under linux
+# DISPLAY_METHOD = ggi
+### OpenGL under X11
+# DISPLAY_METHOD = xgl
+### glide under X11
+# DISPLAY_METHOD = xfx
+### glide in console mode
+# DISPLAY_METHOD = svgafx
+### OpenStep bitmaps
+# DISPLAY_METHOD = openstep
+### SDL library
+# DISPLAY_METHOD = SDL
+
+
+##############################################################################
+# *** X windows options, only needed for X as display method
+##############################################################################
+
+# *** If you don't have the MIT-Shared Memory X Extensions, comment the
+# following: ( Test if available by mean of xdpyinfo command )
+MSHM	= -DUSE_MITSHM
+
+# *** If you are running xfree86 and wnat to use DGA, uncomment the following:
+# DGA     = -DUSE_DGA
+# DGALIBS = -lXxf86dga -lXxf86vm
+
+# *** If you have the XIL library (Solaris 2.5.1 and higher), uncomment
+# the following lines:
+# XILFLAGS = -DUSE_XIL
+# XILLIBS  = -lxil -lpthread
+
+# *** Choice the location of your X headers & libs
+# standard location for X11 
+# X11INC		= -I/usr/include/X11
+# X11LIB		= -L/usr/lib/X11
+# standard location for XFree86
+X11INC		= -I/usr/X11R6/include
+X11LIB		= -L/usr/X11R6/lib
+# for Sun systems
+# X11INC		= -I/usr/openwin/include
+# X11LIB		= -L/usr/openwin/lib
+# for non-standard locations
+# X11INC		= -I/usr/local/include/X11
+# X11LIB		= -L/usr/local/lib
+
+
+##############################################################################
+# *** OpenGL info -- configure if you are using the xgl display option
+##############################################################################
+# *** what are the names of your OpenGL libs?
+GLLIBS= -lGL -lGLU
+
+# *** Uncomment next line if you're using NVIDIA's hw accelerated GLX drivers
+# NVIDIA= -DNVIDIA
+
+##############################################################################
+# *** architecture, Choose your CPU (!!only one!!) 
+##############################################################################
+
+### i386 + gnu-asm
+ MY_CPU = i386
+### i386 no asm
+# MY_CPU = i386_noasm
+### alpha
+# MY_CPU = alpha
+### m68k
+# MY_CPU = m68k
+### generic risc (powerpc, sparc, hppa, ibm)
+# MY_CPU = risc
+### generic risc, lsb-first (RISC (ultrix machines))
+# MY_CPU = risc_lsb
+### mips (generic risc + SGI compiler bug workarounds)
+# MY_CPU = mips
+
+##############################################################################
+# *** architecture, Choose your OS (!!only one!!) 
+##############################################################################
+
+### Linux 
+ARCH  = linux
+### FreeBSD
+# ARCH  = freebsd
+### NetBSD
+# ARCH  = netbsd
+### Solaris / SunOS
+# ARCH  = solaris
+### OpenStep
+# ARCH  = next
+### Mac OS X
+# ARCH  = macosx
+### IRIX ( with sound requires the dmedia package ) (*)
+# ARCH  = irix
+### IRIX ( with sound using the new al package) (*)
+# ARCH  = irix_al
+### aix ( with sound, you'll need the UMS and SOM lpp's installed ( under AIX4 ))
+# ARCH  = aix
+### generic unix, no sound
+# ARCH  = generic
+
+# *) For IRIX 6.5 or higher add -DHAVE_SNPRINTF to CFLAGS.irix(_al) in
+# src/unix/Makefile
+
+##############################################################################
+# All done, type make -f makefile.unix and enjoy xmame/xmess ;)
+# No configurable options below this line....
+##############################################################################
+
+
+##############################################################################
+# **** CPU dependent cflags.
+##############################################################################
+#note : -D__CPU_$(MY_CPU) is added automaticly later on.
+CFLAGS.i386       = -DLSB_FIRST -DX86_ASM
+CFLAGS.i386_noasm = -DLSB_FIRST -Di386
+CFLAGS.alpha      = -DLSB_FIRST -DALIGN_INTS -DALIGN_SHORTS -D__LP64__
+CFLAGS.amd64      = -DLSB_FIRST -DALIGN_INTS -DALIGN_SHORTS -D__LP64__
+CFLAGS.m68k       = 
+CFLAGS.risc       = -DALIGN_INTS -DALIGN_SHORTS 
+CFLAGS.risc_lsb   = -DALIGN_INTS -DALIGN_SHORTS -DLSB_FIRST
+CFLAGS.mips       = -DALIGN_INTS -DALIGN_SHORTS -DSGI_FIX_MWA_NOP
+
+##############################################################################
+# **** Architecture dependent libs.
+##############################################################################
+LIBS.solaris       = -lnsl -lsocket
+LIBS.irix          = -laudio
+LIBS.irix_al       = -laudio
+LIBS.aix           = -lUMSobj
+
+##############################################################################
+# **** Display dependent libs.
+##############################################################################
+# svga and ggi also use $(X11LIB) since that's where zlib often is
+LIBS.x11        = $(X11LIB) $(XILLIBS) $(DGALIBS) $(JSLIB) -lX11 -lXext 
+LIBS.svgalib    = $(X11LIB) -lvga -lvgagl
+LIBS.ggi        = $(X11LIB) -lggi
+LIBS.xgl        = $(X11LIB) -lX11 -lXext $(GLLIBS) -ljpeg
+LIBS.xfx        = $(X11LIB) -lX11 -lXext -lglide2x
+LIBS.svgafx     = $(X11LIB) -lvga -lvgagl -lglide2x
+LIBS.openstep	= -framework AppKit -framework SoundKit
+LIBS.SDL	= -ldl -lSDL -lpthread -D_REENTRANT
+
+##############################################################################
+# **** Display dependent cflags.
+##############################################################################
+CFLAGS.x11      = $(X11INC) $(DGA) $(MSHM) $(XILFLAGS) $(JSX11) \
+ $(JSPOLL) "-DX11_JOYNAME='$(JSNAME)'"
+CFLAGS.xgl      = $(X11INC) $(MSHM) $(JSX11) $(JSPOLL) \
+ "-DX11_JOYNAME='$(JSNAME)'" $(NVIDIA)
+CFLAGS.xfx      = $(X11INC) $(MSHM) $(JSX11) $(JSPOLL) \
+ "-DX11_JOYNAME='$(JSNAME)'" -I/usr/include/glide
+CFLAGS.svgafx   = -I/usr/include/glide
+CFLAGS.SDL      = -D_REENTRANT
+
+##############################################################################
+# **** Display dependent install.
+##############################################################################
+INST.x11        = doinstall
+INST.ggi        = doinstall
+INST.svgalib    = doinstallsuid
+INST.xgl        = doinstallsuid copycab
+INST.xfx        = doinstallsuid
+INST.svgafx     = doinstallsuid
+INST.SDL	= doinstallsuid
+
+##############################################################################
+# Quiet the compiler output if requested
+##############################################################################
+ifdef QUIET
+CC_COMMENT = 
+CC_COMPILE = @
+AR_OPTS = rc
+else
+CC_COMMENT = \#
+CC_COMPILE = 
+AR_OPTS = rcv
+endif
+
+##############################################################################
+# these are the object subdirectories that need to be created.
+##############################################################################
+OBJ     = obj-$(NAME)
+
+OBJDIRS = $(OBJ) \
+	$(OBJ)/drivers $(OBJ)/machine $(OBJ)/vidhrdw $(OBJ)/sndhrdw \
+	$(OBJ)/cpu $(OBJ)/sound $(OBJ)/cpu/i8039 $(OBJ)/cpu/i8085 \
+	$(OBJ)/cpu/i86 $(OBJ)/cpu/m6502 $(OBJ)/cpu/m68000 $(OBJ)/cpu/m6805 \
+	$(OBJ)/cpu/m6800 $(OBJ)/cpu/m6809 $(OBJ)/cpu/s2650 $(OBJ)/cpu/t11 \
+	$(OBJ)/cpu/z80 $(OBJ)/cpu/tms34010 $(OBJ)/cpu/tms9900 \
+	$(OBJ)/cpu/z8000 $(OBJ)/cpu/tms32010 $(OBJ)/cpu/h6280 \
+	$(OBJ)/cpu/ccpu $(OBJ)/cpu/pdp1 $(OBJ)/cpu/konami $(OBJ)/cpu/nec \
+	$(OBJ)/cpu/gensync $(OBJ)/cpu/adsp2100 $(OBJ)/cpu/z80gb \
+	$(OBJ)/mess $(OBJ)/mess/systems $(OBJ)/mess/machine \
+	$(OBJ)/mess/vidhrdw $(OBJ)/mess/sndhrdw
+
+##############################################################################
+# Begin of the real makefile.
+##############################################################################
+all: $(OBJDIRS) osdepend $(NAME).$(DISPLAY_METHOD)
+
+include makefile.$(OBJ)
+
+ifeq ($(NAME),xmess)
+   MESS=-DMESS -DNEOFREE
+endif
+
+# Perhaps one day original mame/mess sources will use POSIX strcasecmp and
+# M_PI instead MS-DOS counterparts... ( a long and sad history ...)
+MY_CFLAGS = $(CFLAGS) $(IL) $(TD) $(CFLAGS.$(MY_CPU)) \
+	-D__ARCH_$(ARCH) -D__CPU_$(MY_CPU) \
+	-D$(DISPLAY_METHOD) -Dstricmp=strcasecmp -DPI=M_PI -DUNIX \
+        -DSIGNED_SAMPLES $(MESS) $(MAMENET) $(DEBUG) \
+	$(SOUNDDEFS) $(CPUDEFS) $(ASMDEFS) \
+	$(INCLUDES) $(ZLIB_INCLUDES) -Isrc -Isrc/unix -I$(OBJ)/cpu/m68000 \
+	-Isrc/cpu/m68000
+
+# CONFIG are the cflags used to build the unix tree, this is were most defines
+# go
+CONFIG = $(MY_CFLAGS) $(CFLAGS.$(DISPLAY_METHOD)) $(JSI386) $(JSPAD) \
+	 -DXMAMEROOT='\"$(XMAMEROOT)\"' -DVERSION='\"$(VERSION)\"' \
+	 -DNAME='\"$(NAME)\"' -DDISPLAY_METHOD='\"$(DISPLAY_METHOD)\"' \
+	 $(ESOUND_CFLAGS)
+
+OBJS   = $(OBJCORE) $(OBJ)/unix.$(DISPLAY_METHOD)/osdepend.a \
+ $(OBJ)/unix.$(DISPLAY_METHOD)/vector.o
+
+MY_LIBS = $(LIBS) $(LIBS.$(ARCH)) $(LIBS.$(DISPLAY_METHOD)) $(ZLIB_LIBS) \
+ $(DEBUGLIBS) $(ESOUND_LIBS) -lz -lm
+
+$(NAME).$(DISPLAY_METHOD): $(ZLIB) $(OBJS)
+	$(CC_COMMENT) @echo 'Linking $@ ...'
+	$(CC_COMPILE) $(LD) -o $@ $(OBJS) $(MY_LIBS)
+
+$(OBJDIRS):
+	-mkdir $@
+
+xlistdev: contrib/tools/xlistdev.c
+	$(CC_COMMENT) @echo 'Compiling $< ...'
+	$(CC_COMPILE) $(CC) $(X11INC) contrib/tools/xlistdev.c -o xlistdev $(JSLIB) $(LIBS.$(ARCH)) $(LIBS.$(DISPLAY_METHOD)) -lm
+
+osdepend:
+	$(CC_COMMENT) @echo 'Compiling in the unix directory...'
+	$(CC_COMPILE) \
+	 ( \
+	 cd src/unix; \
+	  $(MAKE) CC="$(CC)" RANLIB="$(RANLIB)" ARCH="$(ARCH)" \
+	  DISPLAY_METHOD="$(DISPLAY_METHOD)" CFLAGS="$(CONFIG)" \
+	  CC_COMMENT="$(CC_COMMENT)" CC_COMPILE="$(CC_COMPILE)" \
+	  AR_OPTS="$(AR_OPTS)" OBJ="$(OBJ)" \
+	 )
+
+contrib/cutzlib-1.1.3/libz.a:
+	( \
+	cd contrib/cutzlib-1.1.3; \
+	./configure; \
+	$(MAKE) libz.a \
+	)
+
+$(OBJ)/%.o: src/%.c
+	$(CC_COMMENT) @echo 'Compiling $< ...'
+	$(CC_COMPILE) $(CC) $(MY_CFLAGS) -o $@ -c $<
+
+$(OBJ)/%.a:
+	$(CC_COMMENT) @echo 'Archiving $@ ...'
+	$(CC_COMPILE) ar $(AR_OPTS) $@ $^
+	$(CC_COMPILE) $(RANLIB) $@
+
+# special cases for the 68000 core
+#
+# The objs created from generated c-files
+M68000_GENERATED_OBJS = \
+ $(OBJ)/cpu/m68000/m68kops.o $(OBJ)/cpu/m68000/m68kopac.o \
+ $(OBJ)/cpu/m68000/m68kopdm.o $(OBJ)/cpu/m68000/m68kopnz.o
+
+# this generates the C source files for the 68000 emulator
+$(OBJ)/cpu/m68000/m68kmake $(OBJ)/cpu/m68000/m68kops.h: src/cpu/m68000/m68kmake.c src/cpu/m68000/m68k_in.c
+	$(CC_COMMENT) @echo 'Compiling src/cpu/m68000/m68kmake.c ...'
+	$(CC_COMPILE) $(CC) $(MY_CFLAGS) -o $(OBJ)/cpu/m68000/m68kmake src/cpu/m68000/m68kmake.c
+	$(CC_COMMENT) @echo 'Compiling src/cpu/m68000/m68k_in.c ...'
+	$(CC_COMPILE) $(OBJ)/cpu/m68000/m68kmake $(OBJ)/cpu/m68000 src/cpu/m68000/m68k_in.c
+
+# to compile generated C-files
+$(M68000_GENERATED_OBJS): $(OBJ)/cpu/m68000/m68kmake
+	$(CC_COMMENT) @echo 'Compiling $*.c ...'
+	$(CC_COMPILE) $(CC) $(MY_CFLAGS) -o $@ -c $*.c
+
+# src/cpu/m68000/m68kcpu.c needs a generated .h file
+$(OBJ)/cpu/m68000/m68kcpu.o: $(OBJ)/cpu/m68000/m68kops.h
+
+# The m68000 asm core
+$(OBJ)/cpu/m68000/68kem.o: src/cpu/m68000/make68k.c
+	$(CC_COMMENT) @echo 'Compiling $< ...'
+	$(CC_COMPILE) $(CC) $(MY_CFLAGS) -o $(OBJ)/cpu/m68000/make68k src/cpu/m68000/make68k.c
+	$(CC_COMPILE) $(OBJ)/cpu/m68000/make68k $(OBJ)/cpu/m68000/68kem.asm $(OBJ)/cpu/m68000/comptab.asm
+	$(CC_COMMENT) @echo 'Assembling $(OBJ)/cpu/m68000/68kem.asm ...'
+	$(CC_COMPILE) $(ASM_STRIP) $(OBJ)/cpu/m68000/68kem.asm
+	$(CC_COMPILE) nasm $(NASM_FMT) -o $(OBJ)/cpu/m68000/68kem.o $(OBJ)/cpu/m68000/68kem.asm
+
+
+#some tricks, since vector.o these days is display-method dependent:
+$(OBJ)/unix.$(DISPLAY_METHOD)/vector.o: src/vidhrdw/vector.c
+	$(CC_COMMENT) @echo 'Compiling $< ...'
+	$(CC_COMPILE) $(CC) $(MY_CFLAGS) -o $@ -c $<
+
+#make sure this isn't accidently in makefile.$(OBJ):
+$(OBJ)/vidhrdw/vector.o: bla
+
+install: $(INST.$(DISPLAY_METHOD)) install-man
+	@echo $(NAME) $(VERSION) for $(ARCH) installation completed
+
+install-man:
+	@echo installing manual pages under $(MANDIR) ...
+	-mkdir $(MANDIR)
+	$(INSTALL) doc/xmame.man $(MANDIR)/xmame.6
+
+doinstall:
+	@echo installing binaries under $(DESTDIR)...
+	$(INSTALL) $(NAME).$(DISPLAY_METHOD) $(DESTDIR)
+
+doinstallsuid:
+	@echo installing binaries under $(DESTDIR)...
+	$(INSTALL) $(NAME).$(DISPLAY_METHOD) $(DESTDIR)
+	chmod 4755 $(DESTDIR)/$(NAME).$(DISPLAY_METHOD)
+
+copycab:
+	@echo installing cabinet files under $(XMAMEROOT)...
+	$(INSTALL) -R cab $(XMAMEROOT)
+
+clean: 
+	rm -fr $(OBJ) $(NAME).* xlistdev contrib/cutzlib-1.1.3/libz.a contrib/cutzlib-1.1.3/*.o
+
+bindist: 
+	tar zcvf $(DISTDIR)/$(NAME).$(ARCH)-$(DISPLAY_METHOD)_bin.tgz $(NAME).$(DISPLAY_METHOD) doc
+
+srcdist: clean
+	( cd ..; tar zcvf $(DISTDIR)/$(NAME)-$(VERSION)_src.tgz $(NAME)-$(VERSION) )

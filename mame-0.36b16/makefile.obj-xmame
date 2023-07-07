@@ -1,0 +1,102 @@
+# uncomment the following lines to include a CPU core
+CPUS+=Z80@
+
+# uncomment the following lines to include a sound core
+SOUNDS+=CUSTOM@
+SOUNDS+=SAMPLES@
+SOUNDS+=DAC@
+SOUNDS+=AY8910@
+SOUNDS+=YM2203@
+# enable only one of the following two
+#SOUNDS+=YM2151@
+# SOUNDS+=SN76477@
+SOUNDS+=SN76496@
+SOUNDS+=NAMCO@
+
+# List of CPU core (and, for a debug build, disassembler) object files
+CPUDEFS =
+CPUOBJS =
+DBGOBJS =
+ASMDEFS =
+
+CPU=$(strip $(findstring Z80@,$(CPUS)))
+ifneq ($(CPU),)
+CPUDEFS += -DHAS_Z80=1
+CPUOBJS += $(OBJ)/cpu/z80/z80.o
+DBGOBJS += $(OBJ)/cpu/z80/z80dasm.o
+endif
+
+
+
+
+SOUND=$(strip $(findstring CUSTOM@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_CUSTOM=1
+endif
+
+SOUND=$(strip $(findstring SAMPLES@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_SAMPLES=1
+SOUNDOBJS += $(OBJ)/sound/samples.o
+endif
+
+SOUND=$(strip $(findstring DAC@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_DAC=1
+SOUNDOBJS += $(OBJ)/sound/dac.o
+endif
+
+SOUND=$(strip $(findstring AY8910@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_AY8910=1
+SOUNDOBJS += $(OBJ)/sound/ay8910.o
+endif
+
+
+SOUND=$(strip $(findstring SN76477@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_SN76477=1
+SOUNDOBJS += $(OBJ)/sound/sn76477.o
+endif
+
+SOUND=$(strip $(findstring SN76496@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_SN76496=1
+SOUNDOBJS += $(OBJ)/sound/sn76496.o
+endif
+
+
+SOUND=$(strip $(findstring NAMCO@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_NAMCO=1
+SOUNDOBJS += $(OBJ)/sound/namco.o
+endif
+
+
+
+OBJCORE = \
+	$(OBJ)/version.o $(OBJ)/driver.o $(OBJ)/mame.o \
+	$(OBJ)/drawgfx.o $(OBJ)/common.o $(OBJ)/usrintrf.o \
+	$(OBJ)/cpuintrf.o $(OBJ)/memory.o $(OBJ)/timer.o $(OBJ)/palette.o \
+	$(OBJ)/input.o $(OBJ)/inptport.o $(OBJ)/cheat.o $(OBJ)/unzip.o \
+	$(OBJ)/audit.o $(OBJ)/info.o $(OBJ)/png.o $(OBJ)/artwork.o \
+	$(OBJ)/tilemap.o $(OBJ)/sprite.o $(OBJ)/gfxobj.o \
+	$(sort $(CPUOBJS)) \
+	$(OBJ)/sndintrf.o \
+	$(OBJ)/sound/streams.o $(OBJ)/sound/mixer.o \
+	$(sort $(SOUNDOBJS)) \
+	$(OBJ)/sound/votrax.o \
+	$(OBJ)/machine/z80fmly.o \
+	$(OBJ)/vidhrdw/generic.o \
+	$(OBJ)/mamedbg.o $(OBJ)/window.o \
+	$(OBJ)/profiler.o \
+	$(sort $(DBGOBJS)) \
+	$(OBJ)/pacman.a \
+
+$(OBJ)/pacman.a: \
+	$(OBJ)/machine/pacman.o $(OBJ)/drivers/pacman.o \
+	$(OBJ)/machine/pacplus.o \
+	$(OBJ)/machine/theglob.o \
+	$(OBJ)/machine/jrpacman.o $(OBJ)/drivers/jrpacman.o $(OBJ)/vidhrdw/jrpacman.o \
+	$(OBJ)/vidhrdw/pengo.o $(OBJ)/drivers/pengo.o \
+
