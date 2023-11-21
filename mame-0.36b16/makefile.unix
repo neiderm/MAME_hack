@@ -233,7 +233,8 @@ QUIET = 1
 # uncomment the following 2 lines for esound support
 # ESOUND_CFLAGS = -DSYSDEP_DSP_ESOUND `esd-config --cflags`
 # ESOUND_LIBS = `esd-config --libs`
-
+ESOUND_CFLAGS = -DSYSDEP_DSP_ALSA
+ESOUND_LIBS = -lasound
 
 ##############################################################################
 # *** Select your display method, choose only one

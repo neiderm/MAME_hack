@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="pacman -rompath /home/xubuntu/junk/MAME_hack/xmame-0.37b7.1" />
+				<Option parameters="pacman -rompath ~/roms" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
