@@ -1,6 +1,6 @@
-diff -Naur xmame-0.37b1.2.org/makefile.obj-xmame xmame-0.37b1.2+++/makefile.obj-xmame
---- xmame-0.37b1.2.org/makefile.obj-xmame	2000-04-08 06:44:28.000000000 -0500
-+++ xmame-0.37b1.2+++/makefile.obj-xmame	2023-06-22 14:40:08.714715044 -0400
+diff -Naur xmame-0.37b1.2_org/makefile.obj-xmame xmame-0.37b1.2/makefile.obj-xmame
+--- xmame-0.37b1.2_org/makefile.obj-xmame	2000-04-08 07:44:28.000000000 -0400
++++ xmame-0.37b1.2/makefile.obj-xmame	2023-11-22 18:22:55.275998197 -0500
 @@ -1,57 +1,5 @@
  # uncomment the following lines to include a CPU core
  CPUS+=Z80@
@@ -1245,28 +1245,52 @@ diff -Naur xmame-0.37b1.2.org/makefile.obj-xmame xmame-0.37b1.2+++/makefile.obj-
 -	$(OBJ)/vidhrdw/mole.o $(OBJ)/drivers/mole.o \
 -	$(OBJ)/vidhrdw/gotya.o $(OBJ)/sndhrdw/gotya.o $(OBJ)/drivers/gotya.o \
 -	$(OBJ)/vidhrdw/mrjong.o $(OBJ)/drivers/mrjong.o
-diff -Naur xmame-0.37b1.2.org/src/cheat.c xmame-0.37b1.2+++/src/cheat.c
---- xmame-0.37b1.2.org/src/cheat.c	2000-04-15 11:33:03.000000000 -0500
-+++ xmame-0.37b1.2+++/src/cheat.c	2023-06-22 14:41:29.633600576 -0400
+diff -Naur xmame-0.37b1.2_org/makefile.unix xmame-0.37b1.2/makefile.unix
+--- xmame-0.37b1.2_org/makefile.unix	2000-04-12 16:14:42.000000000 -0400
++++ xmame-0.37b1.2/makefile.unix	2023-11-23 15:25:48.202331037 -0500
+@@ -232,7 +232,9 @@
+ # uncomment the following 2 lines for esound support
+ # ESOUND_CFLAGS = -DSYSDEP_DSP_ESOUND `esd-config --cflags`
+ # ESOUND_LIBS = `esd-config --libs`
+-
++# RB: hack ALSA support
++ESOUND_CFLAGS = -DSYSDEP_DSP_ALSA
++ESOUND_LIBS = -lasound
+ 
+ ##############################################################################
+ # *** Select your display method, choose only one
+@@ -357,7 +359,8 @@
+ #note : -D__CPU_$(MY_CPU) is added automaticly later on.
+ CFLAGS.i386       = -DLSB_FIRST -DX86_ASM
+ CFLAGS.i386_noasm = -DLSB_FIRST -Di386
+-CFLAGS.alpha      = -DLSB_FIRST -DALIGN_INTS -DALIGN_SHORTS -D__LP64__
++CFLAGS.alpha      = -DLSB_FIRST -DALIGN_INTS -DALIGN_SHORTS -D__LP64
++CFLAGS.amd64      = -DLSB_FIRST -DALIGN_INTS -DALIGN_SHORTS -D__LP64
+ CFLAGS.m68k       = 
+ CFLAGS.risc       = -DALIGN_INTS -DALIGN_SHORTS 
+ CFLAGS.risc_lsb   = -DALIGN_INTS -DALIGN_SHORTS -DLSB_FIRST
+diff -Naur xmame-0.37b1.2_org/src/cheat.c xmame-0.37b1.2/src/cheat.c
+--- xmame-0.37b1.2_org/src/cheat.c	2000-04-15 12:33:03.000000000 -0400
++++ xmame-0.37b1.2/src/cheat.c	2023-11-23 15:28:32.506291341 -0500
 @@ -722,7 +722,15 @@
  
  #ifndef NEOFREE
  #ifndef TINY_COMPILE
 +
-+#if 1 /* force tiny compile */ 
++#if 1 /* RB: force tiny compile */ 
 +#define TINY_COMPILE
 +#else
 +
  extern struct GameDriver driver_neogeo;
 +
-+#endif /* force tiny */ 
++#endif /* RB: force tiny */ 
 +
  #endif
  #endif
  
-diff -Naur xmame-0.37b1.2.org/src/cpuintrf.c xmame-0.37b1.2+++/src/cpuintrf.c
---- xmame-0.37b1.2.org/src/cpuintrf.c	2000-04-15 11:33:03.000000000 -0500
-+++ xmame-0.37b1.2+++/src/cpuintrf.c	2023-06-22 14:37:39.229282274 -0400
+diff -Naur xmame-0.37b1.2_org/src/cpuintrf.c xmame-0.37b1.2/src/cpuintrf.c
+--- xmame-0.37b1.2_org/src/cpuintrf.c	2000-04-15 12:33:03.000000000 -0400
++++ xmame-0.37b1.2/src/cpuintrf.c	2023-11-23 14:45:27.032606275 -0500
 @@ -264,7 +264,7 @@
  		name##_get_sp, name##_set_sp, name##_get_reg, name##_set_reg,			   \
  		name##_set_nmi_line, name##_set_irq_line, name##_set_irq_callback,		   \
@@ -1294,14 +1318,14 @@ diff -Naur xmame-0.37b1.2.org/src/cpuintrf.c xmame-0.37b1.2+++/src/cpuintrf.c
  		cpu_readmem##mem, cpu_writemem##mem, cpu_setOPbase##mem,				   \
  		shift, bits, CPU_IS_##endian, align, maxinst,							   \
  		ABITS1_##MEM, ABITS2_##MEM, ABITS_MIN_##MEM 							   \
-diff -Naur xmame-0.37b1.2.org/src/driver.c xmame-0.37b1.2+++/src/driver.c
---- xmame-0.37b1.2.org/src/driver.c	2000-04-15 11:33:03.000000000 -0500
-+++ xmame-0.37b1.2+++/src/driver.c	2023-06-22 14:43:58.267946849 -0400
+diff -Naur xmame-0.37b1.2_org/src/driver.c xmame-0.37b1.2/src/driver.c
+--- xmame-0.37b1.2_org/src/driver.c	2000-04-15 12:33:03.000000000 -0400
++++ xmame-0.37b1.2/src/driver.c	2023-11-23 15:28:03.981033858 -0500
 @@ -68,6 +68,10 @@
  
  #else	/* DRIVER_RECURSIVE */
  
-+#if 1 /* force tiny compile */
++#if 1 /* RB: force tiny compile */
 +	DRIVER( pacman )    /* (c) 1980 Namco */
 +#else
 +
@@ -1314,8 +1338,8 @@ diff -Naur xmame-0.37b1.2.org/src/driver.c xmame-0.37b1.2+++/src/driver.c
  	DRIVER( starjacs )	/* (c) 1983 Stern (S1) */
 -	DRIVER( regulus )	/* 834-5328 (c) 1983 (S1) */
 -	DRIVER( regulusu )	/* 834-5328 (c) 1983 (S1) */
-+	DRIVER( regulus )	/* 834-5328\A0(c) 1983 (S1) */
-+	DRIVER( regulusu )	/* 834-5328\A0(c) 1983 (S1) */
++	DRIVER( regulus )	/* 834-5328 (c) 1983 (S1) */
++	DRIVER( regulusu )	/* 834-5328 (c) 1983 (S1) */
  	DRIVER( upndown )	/* (c) 1983 (S1) */
  	DRIVER( mrviking )	/* 834-5383 (c) 1984 (S1) */
  	DRIVER( mrvikinj )	/* 834-5383 (c) 1984 (S1) */
@@ -1323,14 +1347,788 @@ diff -Naur xmame-0.37b1.2.org/src/driver.c xmame-0.37b1.2+++/src/driver.c
  
  #endif	/* NEOFREE */
  
-+#endif /* force tiny compile */
++#endif /* RB: force tiny compile */
 +
  #endif	/* DRIVER_RECURSIVE */
  
  #endif	/* TINY_COMPILE */
-diff -Naur xmame-0.37b1.2.org/src/unix/video-drivers/SDL.c xmame-0.37b1.2+++/src/unix/video-drivers/SDL.c
---- xmame-0.37b1.2.org/src/unix/video-drivers/SDL.c	2000-02-22 02:33:00.000000000 -0500
-+++ xmame-0.37b1.2+++/src/unix/video-drivers/SDL.c	2023-06-22 14:42:02.941188977 -0400
+diff -Naur xmame-0.37b1.2_org/src/unix/Makefile xmame-0.37b1.2/src/unix/Makefile
+--- xmame-0.37b1.2_org/src/unix/Makefile	2000-04-07 05:37:58.000000000 -0400
++++ xmame-0.37b1.2/src/unix/Makefile	2023-11-23 15:35:03.361029938 -0500
+@@ -37,6 +37,7 @@
+ DSP_DIR = $(OBJDIR)/sysdep/dsp-drivers
+ MIXER_DIR = $(OBJDIR)/sysdep/mixer-drivers
+ SOUND_OBJS.linux   = $(DSP_DIR)/oss.o $(MIXER_DIR)/oss.o
++SOUND_OBJS.linux   += $(DSP_DIR)/alsa.o  # RB: from xmame-37b7.1
+ SOUND_OBJS.freebsd = $(DSP_DIR)/oss.o $(MIXER_DIR)/oss.o
+ SOUND_OBJS.netbsd  = $(DSP_DIR)/netbsd.o
+ SOUND_OBJS.solaris = $(DSP_DIR)/solaris.o $(MIXER_DIR)/solaris.o
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/dsp-drivers/alsa.c xmame-0.37b1.2/src/unix/sysdep/dsp-drivers/alsa.c
+--- xmame-0.37b1.2_org/src/unix/sysdep/dsp-drivers/alsa.c	1969-12-31 19:00:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/sysdep/dsp-drivers/alsa.c	2023-11-23 14:02:37.206932891 -0500
+@@ -0,0 +1,608 @@
++/* RB: from xmame-0.79.1 in entirety */
++/*
++ * ALSA Sound Driver for xMAME
++ *
++ *  Copyright 2000 Luc Saillard <luc.saillard@alcove.fr>
++ *  Copyright 2001, 2002, 2003 Shyouzou Sugitani <shy@debian.or.jp>
++ *  
++ *  This file and the acompanying files in this directory are free software;
++ *  you can redistribute them and/or modify them under the terms of the GNU
++ *  Library General Public License as published by the Free Software Foundation;
++ *  either version 2 of the License, or (at your option) any later version.
++ *
++ *  These files are distributed in the hope that they will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *  Library General Public License for more details.
++ *
++ *  You should have received a copy of the GNU Library General Public
++ *  License along with these files; see the file COPYING.LIB.  If not,
++ *  write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
++ *  Boston, MA 02111-1307, USA.
++ *
++ * Changelog:
++ *   v 0.1 Thu, 10 Aug 2000 08:29:00 +0200
++ *     - initial release
++ *     - TODO: find the best sound card to play sound.
++ *   v 0.2 Wed, 13 Sep 2000    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - change from block to stream mode.
++ *   v 0.3 Sat, 16 Sep 2000    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - one important bug fix, performance improvements and code cleanup.
++ *   v 0.4 Sun, 15 Apr 2001    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - minor cosmetic changes.
++ *     - suppression of bogus warnings about underruns.
++ *     - TODO: add support for ALSA 0.9 API.
++ *   v 0.5 Thu, 17 May 2001    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - added preliminary support for ALSA 0.9 API.
++ *     - split of the 0.5 and 0.9 API stuff into separate files.
++ *   v 0.6 Sat, 19 May 2001    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - update of the 0.9 API stuff.
++ *       added -list-alsa-pcm option.
++ *       improved write error handling.
++ *   v 0.7 Sat, 08 Sep 2001    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - update of the 0.9 API stuff.
++ *       added -alsa-buffer option.
++ *       use SND_PCM_FORMAT_S16 instead of SND_PCM_FORMAT_S16_{LE,BE}.
++ *   v 0.8 Thu, 13 Sep 2001    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - update of the 0.9 API stuff.
++ *       changed the -alsapcm(-pcm) to -alsa-pcm(-apcm).
++ *       changed the default value of the -alsa-pcm.
++ *   V 0.8a                    Stephen Anthony
++ *     - Fixed a problem in the ALSA 0.9 driver with setting the sample rate
++ *       on SB128 soundcards.
++ *   V 0.9 Mon, 13 Jan 2003    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - removed the 0.5 API support.
++ *   V 1.0 Wed, 21 Jan 2004    Shyouzou Sugitani <shy@debian.or.jp>
++ *     - Update to the ALSA 1.0 API.
++ *
++ */
++
++#include "xmame.h"           /* xMAME common header */
++#include "devices.h"         /* xMAME device header */
++
++#ifdef SYSDEP_DSP_ALSA
++
++#define ALSA_PCM_NEW_HW_PARAMS_API 1
++
++#include <sys/ioctl.h>       /* System and I/O control */
++#include <alsa/asoundlib.h>  /* ALSA sound library header */
++#include "sysdep/sysdep_dsp.h"
++#include "sysdep/sysdep_dsp_priv.h"
++#include "sysdep/plugin_manager.h"
++
++/* our per instance private data struct */
++struct alsa_dsp_priv_data
++{
++	snd_pcm_t *pcm_handle;
++};
++
++/* public methods prototypes (static but exported through the sysdep_dsp or
++   plugin struct) */
++static int alsa_dsp_init(void);
++static void *alsa_dsp_create(const void *flags);
++static void alsa_dsp_destroy(struct sysdep_dsp_struct *dsp);
++static int alsa_dsp_get_freespace(struct sysdep_dsp_struct *dsp);
++static int alsa_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
++			  int count);
++static int alsa_device_list(struct rc_option *option, const char *arg,
++			    int priority);
++static int alsa_pcm_list(struct rc_option *option, const char *arg,
++			 int priority);
++static int alsa_dsp_set_params(struct alsa_dsp_priv_data *priv);
++
++/* public variables */
++
++static struct {
++        snd_pcm_format_t format;
++        unsigned int channels;
++        unsigned int rate;
++} pcm_params;
++
++static char *pcm_name = NULL;
++static snd_pcm_stream_t stream = SND_PCM_STREAM_PLAYBACK;
++static size_t bits_per_sample, bits_per_frame;
++static unsigned int buffer_time;
++static snd_pcm_uframes_t period_frames = 1;
++
++struct rc_option alsa_dsp_opts[] = {
++	/* name, shortname, type, dest, deflt, min, max, func, help */
++	{ "Alsa Sound System", NULL,     rc_seperator, NULL,
++	  NULL,    0,      0,    NULL,
++	  NULL },
++	{ "list-alsa-cards", NULL,	rc_use_function_no_arg, NULL,
++	  NULL,    0,      0,    alsa_device_list,
++	  "List available sound cards" },
++	{ "list-alsa-pcm", NULL,	rc_use_function_no_arg, NULL,
++	  NULL,    0,      0,    alsa_pcm_list,
++	  "List available pcm devices" },
++	{ "alsa-pcm",    "apcm",  rc_string,    &pcm_name,
++	  "default",     0,    0,    NULL,
++	  "Specify the PCM by name" },
++	{ "alsa-buffer", "abuf",  rc_int,       &buffer_time,
++	  "250000",      0,    0,    NULL,
++	  "Set the buffer size [micro sec] (default: 250000)" },
++	{ NULL,    NULL,     rc_end,   NULL,
++	  NULL,    0,      0,    NULL,
++	  NULL }
++};
++
++const struct plugin_struct sysdep_dsp_alsa = {
++	"alsa",
++	"sysdep_dsp",
++	"Alsa Sound System DSP plugin",
++	alsa_dsp_opts,
++	alsa_dsp_init,
++	NULL, /* no exit */
++	alsa_dsp_create,
++	4     /* high priority */
++};
++
++/* private variables */
++static int alsa_dsp_bytes_per_sample[4] = SYSDEP_DSP_BYTES_PER_SAMPLE;
++
++
++/* public methods (static but exported through the sysdep_dsp or plugin
++   struct) */
++
++/*
++ * Function name : alsa_dsp_init
++ *
++ * Description : Detect if a card is present on the machine
++ * Output :
++ *   a boolean
++ */
++static int alsa_dsp_init(void)
++{
++	int card = -1;
++	
++	if (snd_card_next(&card) < 0 || card < 0) {
++		fprintf(stderr, "No cards detected.\n"
++			"ALSA sound disabled.\n");
++		return 1;
++	}
++	return 0;
++}
++
++/*
++ * Function name : alsa_dsp_create
++ *
++ * Description : Create an instance of dsp plugins
++ * Input :
++ *   flags: a ptr to struct sysdep_dsp_create_params
++ * Output :
++ *   a ptr to a struct sysdep_dsp_struct
++ */
++static void *alsa_dsp_create(const void *flags)
++{
++	int err;
++	struct alsa_dsp_priv_data *priv = NULL;
++	struct sysdep_dsp_struct *dsp = NULL;
++	const struct sysdep_dsp_create_params *params = flags;
++	snd_pcm_info_t *info;
++	int open_mode = 0;
++
++	/* allocate the dsp struct */
++	dsp = calloc(1, sizeof(struct sysdep_dsp_struct));
++	if (!dsp) {
++		fprintf(stderr,
++			"error malloc failed for struct sysdep_dsp_struct\n");
++		return NULL;
++	}
++
++	/* alloc private data */
++	priv = calloc(1, sizeof(struct alsa_dsp_priv_data));
++	if(!priv) {
++		fprintf(stderr,
++			"error malloc failed for struct alsa_dsp_priv_data\n");
++		alsa_dsp_destroy(dsp);
++		return NULL;
++	}
++
++	/* fill in the functions and some data */
++	memset(priv,0,sizeof(struct alsa_dsp_priv_data));
++	dsp->_priv = priv;
++	dsp->get_freespace = alsa_dsp_get_freespace;
++	dsp->write = alsa_dsp_write;
++	dsp->destroy = alsa_dsp_destroy;
++	dsp->hw_info.type = params->type;
++	dsp->hw_info.samplerate = params->samplerate;
++	dsp->hw_info.bufsize = 0;
++
++	open_mode |= SND_PCM_NONBLOCK;
++
++	pcm_params.format = (dsp->hw_info.type & SYSDEP_DSP_16BIT) ?
++		SND_PCM_FORMAT_S16 /* Signed 16 bit CPU endian */ :
++		SND_PCM_FORMAT_U8;
++
++	/* rate >= 2000 && rate <= 128000 */
++	pcm_params.rate = dsp->hw_info.samplerate;
++	pcm_params.channels = (dsp->hw_info.type & SYSDEP_DSP_STEREO) ? 2 : 1;
++
++	err = snd_pcm_open(&priv->pcm_handle, pcm_name, stream, open_mode);
++	if (err < 0) {
++		fprintf(stderr_file, "Alsa error: audio open error: %s\n",
++			snd_strerror(err));
++		return NULL;
++	}
++
++	snd_pcm_info_alloca(&info);
++	err = snd_pcm_info(priv->pcm_handle, info);
++	if (err < 0) {
++		fprintf(stderr_file, "Alsa error: info error: %s\n",
++			snd_strerror(err));
++		return NULL;
++	}
++	/* set non-blocking mode if selected */
++	if (params->flags & SYSDEP_DSP_O_NONBLOCK) {
++		err = snd_pcm_nonblock(priv->pcm_handle, 1);
++		if (err < 0) {
++			fprintf(stderr_file,
++				"Alsa error: nonblock setting error: %s\n",
++				snd_strerror(err));
++			return NULL;
++		}
++	}
++
++	fprintf(stderr_file, "info: set to %dbit linear %s %dHz\n",
++		(dsp->hw_info.type & SYSDEP_DSP_16BIT) ? 16 : 8,
++		(dsp->hw_info.type & SYSDEP_DSP_STEREO) ? "stereo" : "mono",
++		dsp->hw_info.samplerate);
++
++	if (alsa_dsp_set_params(priv) == 0)
++		return NULL;
++
++	return dsp;
++}
++
++/*
++ * Function name : alsa_dsp_destroy
++ *
++ * Description :
++ * Input :
++ * Output :
++ */
++static void alsa_dsp_destroy(struct sysdep_dsp_struct *dsp)
++{
++	struct alsa_dsp_priv_data *priv = dsp->_priv;
++
++	if (priv) {
++		if (priv->pcm_handle) {
++			snd_pcm_close(priv->pcm_handle);
++		}
++		free(priv);
++	}
++	free(dsp);
++}
++
++/*
++ * Function name : alsa_dsp_get_freespace
++ *
++ * Description :
++ * Input :
++ * Output :
++ */
++static int alsa_dsp_get_freespace(struct sysdep_dsp_struct *dsp)
++{
++	int err;
++	struct alsa_dsp_priv_data *priv = dsp->_priv;
++	snd_pcm_status_t *status;
++	snd_pcm_uframes_t frames;
++
++	snd_pcm_status_alloca(&status);
++	err = snd_pcm_status(priv->pcm_handle, status);
++	if (err < 0) {
++		fprintf(stderr_file, "Alsa error: status error: %s\n",
++			snd_strerror(err));
++		return -1;
++	}
++	frames = snd_pcm_status_get_avail(status);
++	if (frames < 0)
++		return -1;
++	else
++		return frames * bits_per_frame / 8
++			/ alsa_dsp_bytes_per_sample[dsp->hw_info.type];
++}
++
++/*
++ * Function name : alsa_dsp_write
++ *
++ * Description :
++ * Input :
++ * Output :
++ */
++static int alsa_dsp_write(struct sysdep_dsp_struct *dsp, unsigned char *data,
++			  int count)
++{
++	int data_size, result;
++	struct alsa_dsp_priv_data *priv = dsp->_priv;
++
++	data_size = count * alsa_dsp_bytes_per_sample[dsp->hw_info.type]
++		* 8 / bits_per_frame;
++
++	result = snd_pcm_writei(priv->pcm_handle, data, data_size);
++	if (result == -EAGAIN) {
++		return 0;
++	} else if (result == -EPIPE) {
++		int err;
++		snd_pcm_status_t *status;
++
++		snd_pcm_status_alloca(&status);
++		err = snd_pcm_status(priv->pcm_handle, status);
++		if (err < 0) {
++			fprintf(stderr_file,
++				"Alsa error: status error: %s\n",
++				snd_strerror(err));
++			return -1;
++		}
++		if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
++			err = snd_pcm_prepare(priv->pcm_handle);
++			if (err < 0) {
++				fprintf(stderr_file,
++					"Alsa error: prepare error: %s\n",
++					snd_strerror(err));
++				return -1;
++			}
++			/* ok, data should be accepted again */
++			return 0;
++		}
++		fprintf(stderr_file, "Alsa error: write error: %s\n",
++			snd_strerror(result));
++		return -1;
++	} else if (result < 0) {
++		fprintf(stderr_file, "Alsa error: write error: %s\n",
++			snd_strerror(result));
++		return -1;
++	}
++
++	return result * bits_per_frame / 8
++		/ alsa_dsp_bytes_per_sample[dsp->hw_info.type];
++}
++
++/*
++ * Function name : alsa_device_list
++ *
++ * Description :
++ * Input :
++ * Output :
++ */
++static int alsa_device_list(struct rc_option *option, const char *arg,
++			    int priority)
++{
++	snd_ctl_t *handle;
++	int card, err, dev;
++	snd_ctl_card_info_t *info;
++	snd_pcm_info_t *pcminfo;
++	snd_ctl_card_info_alloca(&info);
++	snd_pcm_info_alloca(&pcminfo);
++
++	card = -1;
++	if (snd_card_next(&card) < 0 || card < 0) {
++		printf("Alsa: no soundcards found...\n");
++		return -1;
++	}
++	fprintf(stdout, "Alsa cards:\n");
++	while (card >= 0) {
++		char name[32];
++		sprintf(name, "hw:%d", card);
++		err = snd_ctl_open(&handle, name, 0);
++		if (err < 0) {
++			fprintf(stderr, "Alsa error: control open (%i): %s\n",
++				card, snd_strerror(err));
++			continue;
++		}
++		err = snd_ctl_card_info(handle, info);
++		if (err < 0) {
++			fprintf(stderr,
++				"Alsa error: control hardware info (%i): %s\n",
++				card, snd_strerror(err));
++			snd_ctl_close(handle);
++			continue;
++		}
++		dev = -1;
++		while (1) {
++			int idx;
++			unsigned int count;
++
++			if (snd_ctl_pcm_next_device(handle, &dev) < 0)
++				;
++			if (dev < 0)
++				break;
++			snd_pcm_info_set_device(pcminfo, dev);
++			snd_pcm_info_set_subdevice(pcminfo, 0);
++			snd_pcm_info_set_stream(pcminfo, stream);
++			err = snd_ctl_pcm_info(handle, pcminfo);
++			if (err < 0) {
++				if (err != -ENOENT)
++					fprintf(stderr,
++						"Alsa error: control digital audio info (%i): %s\n",
++						card, snd_strerror(err));
++				continue;
++			}
++			fprintf(stderr,
++				"card %i: %s [%s], device %i: %s [%s]\n",
++				card,
++				snd_ctl_card_info_get_id(info),
++				snd_ctl_card_info_get_name(info),
++				dev,
++				snd_pcm_info_get_id(pcminfo),
++				snd_pcm_info_get_name(pcminfo));
++			count = snd_pcm_info_get_subdevices_count(pcminfo);
++			fprintf(stderr, "  Subdevices: %i/%i\n",
++				snd_pcm_info_get_subdevices_avail(pcminfo),
++				count);
++			for (idx = 0; idx < count; idx++) {
++				snd_pcm_info_set_subdevice(pcminfo, idx);
++				err = snd_ctl_pcm_info(handle, pcminfo);
++				if (err < 0) {
++					fprintf(stderr,
++						"Alsa error: control digital audio playback info (%i): %s",
++						card, snd_strerror(err));
++				} else {
++					fprintf(stderr,
++						"  Subdevice #%i: %s\n",
++						idx, snd_pcm_info_get_subdevice_name(pcminfo));
++				}
++			}
++		}
++		snd_ctl_close(handle);
++		if (snd_card_next(&card) < 0) {
++			break;
++		}
++	}
++	return -1;
++}
++
++/*
++ * Function name : alsa_pcm_list
++ *
++ * Description :
++ * Input :
++ * Output :
++ */
++static int alsa_pcm_list(struct rc_option *option, const char *arg,
++			 int priority)
++{
++        snd_config_t *conf;
++        snd_output_t *out;
++
++        int err;
++
++	err = snd_config_update();
++        if (err < 0) {
++		fprintf(stderr, "Alsa error: snd_config_update: %s\n",
++			snd_strerror(err));
++                return -1;
++        }
++        snd_output_stdio_attach(&out, stderr, 0);
++        err = snd_config_search(snd_config, "pcm", &conf);
++        if (err < 0)
++                return -1;
++        fprintf(stderr, "ALSA PCM devices:\n");
++        snd_config_save(conf, out);
++        snd_output_close(out);
++
++	return -1;
++}
++
++/*
++ * Function name : alsa_dsp_set_params
++ *
++ * Description :
++ * Input :
++ *   priv: a ptr to struct alsa_dsp_priv_data
++ * Output :
++ *  priv is modified with the current parameters.
++ *  a boolean if the card accept the value.
++ *  
++ */
++static int alsa_dsp_set_params(struct alsa_dsp_priv_data *priv)
++{
++	snd_pcm_hw_params_t *hw_params;
++	snd_pcm_sw_params_t *sw_params;
++
++	snd_pcm_uframes_t buffer_size;
++	snd_pcm_uframes_t chunk_size;
++	int err;
++	unsigned int rate;
++
++	snd_pcm_hw_params_alloca(&hw_params);
++	snd_pcm_sw_params_alloca(&sw_params);
++	err = snd_pcm_hw_params_any(priv->pcm_handle, hw_params);
++	if (err < 0) {
++		fprintf(stderr_file,
++			"Alsa error: no configurations available\n");
++		return 0;
++	}
++
++	if (snd_pcm_hw_params_set_access(priv->pcm_handle, hw_params,
++					 SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
++		fprintf(stderr_file,
++			"Alsa error: interleaved access mode non available\n");
++		return 0;
++	}
++
++	err = snd_pcm_hw_params_set_format(priv->pcm_handle, hw_params, pcm_params.format);
++	if (err < 0) {
++		fprintf(stderr_file,
++			"Alsa error: requested format %s isn't supported with hardware\n",
++			snd_pcm_format_name(pcm_params.format));
++		return 0;
++	}
++
++	err = snd_pcm_hw_params_set_channels(priv->pcm_handle, hw_params, pcm_params.channels);
++	if (err < 0) {
++		fprintf(stderr_file,
++			"Alsa error: channels count non available\n");
++		return 0;
++	}
++
++	rate = pcm_params.rate;
++	if (snd_pcm_hw_params_set_rate_near(priv->pcm_handle, hw_params, &pcm_params.rate, 0) < 0) {
++		unsigned int min, max;
++
++		snd_pcm_hw_params_get_rate_min(hw_params, &min, 0);
++		snd_pcm_hw_params_get_rate_max(hw_params, &max, 0);
++		fprintf(stderr_file,
++			"Alsa error: unsupported rate %uHz (valid range is %uHz-%iHz)\n",
++			rate, min, max);
++		return 0;
++	}
++
++	snd_pcm_hw_params_set_buffer_time_near(priv->pcm_handle, hw_params, &buffer_time, 0);
++	snd_pcm_hw_params_set_period_size_near(priv->pcm_handle, hw_params, &period_frames, 0);
++
++	err = snd_pcm_hw_params(priv->pcm_handle, hw_params);
++	if (err < 0) {
++		fprintf(stderr_file,
++			"Alsa error: Unable to install hw params\n");
++		return 0;
++	}
++
++	snd_pcm_hw_params_get_period_size(hw_params, &chunk_size, 0);
++	snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_size);
++	if (chunk_size == buffer_size) {
++		fprintf(stderr_file,
++			"Alsa error: cannot use period equal to buffer size (%lu == %lu)\n",
++			chunk_size, buffer_size);
++		return 0;
++	}
++
++	snd_pcm_sw_params_current(priv->pcm_handle, sw_params);
++
++	snd_pcm_sw_params_set_sleep_min(priv->pcm_handle, sw_params, 0);
++	snd_pcm_sw_params_set_xfer_align(priv->pcm_handle, sw_params, 1);
++	snd_pcm_sw_params_set_avail_min(priv->pcm_handle, sw_params, 1);
++
++	snd_pcm_sw_params_set_start_threshold(priv->pcm_handle, sw_params, 1);
++
++	snd_pcm_sw_params_set_stop_threshold(priv->pcm_handle, sw_params, buffer_size);
++
++	if (snd_pcm_sw_params(priv->pcm_handle, sw_params) < 0) {
++		fprintf(stderr_file, "Alsa error: unable to install sw params\n");
++		return 0;
++	}
++
++#if 0 /* DEBUG */
++	{
++		snd_output_t *log;
++		snd_output_stdio_attach(&log, stderr_file, 0);
++		snd_pcm_dump(priv->pcm_handle, log);
++		snd_output_close(log);
++	}
++#endif
++
++	bits_per_sample = snd_pcm_format_physical_width(pcm_params.format);
++	bits_per_frame = bits_per_sample * pcm_params.channels;
++
++	err = snd_pcm_prepare(priv->pcm_handle);
++	if (err < 0) {
++		fprintf(stderr_file,
++			"Alsa error: unable to prepare audio: %s\n",
++			snd_strerror(err));
++		return 0;
++	}
++
++	return 1;
++}
++
++#endif /* SYSDEP_DSP_ALSA */
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/sound_stream.c xmame-0.37b1.2/src/unix/sysdep/sound_stream.c
+--- xmame-0.37b1.2_org/src/unix/sysdep/sound_stream.c	2000-04-12 16:30:59.000000000 -0400
++++ xmame-0.37b1.2/src/unix/sysdep/sound_stream.c	2023-11-23 13:08:56.106976582 -0500
+@@ -1,3 +1,4 @@
++/* RB: copied in entirety from xmame-37b7.1 */
+ /* Sound stream object
+ 
+    Copyright 2000 Hans de Goede
+@@ -23,6 +24,7 @@
+ */
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include "sound_stream.h"
+ #include "sound_stream_priv.h"
+ #include "fifo.h"
+@@ -168,7 +170,7 @@
+ 
+ void sound_stream_update(struct sound_stream_struct *stream)
+ {
+-   int freespace, samples;
++   int freespace;
+    struct sound_stream_sample_buf *sample_buf;
+ 
+    /* get freespace */   
+@@ -176,20 +178,10 @@
+ #ifdef SOUND_STREAM_DEBUG
+    fprintf(stderr, "debug: sound_stream: freespace = %d\n", freespace);
+ #endif
+-   if (freespace < 0)
+-      return;
+-      
+-   if(freespace > stream->output_buf_size)
+-   {
+-      fprintf(stderr, "warning: sound_stream: freespace > max_freespace, this should not happen ! Please report\n");
+-      freespace = stream->output_buf_size;
+-   }
+-   
+-   samples = 0;
+-   
+-   while(samples < freespace)
++
++   while(freespace > 0)
+    {
+-      int samples_this_loop;
++      int result, samples_this_loop;
+       
+       /* we peek a sample_buf since we might not completly use it, once we're
+          done we get it to disgard it. If there haven't been any writes to the
+@@ -203,16 +195,36 @@
+ #endif
+       
+       samples_this_loop = sample_buf->length - sample_buf->pos;
+-      if (samples_this_loop > (freespace - samples))
+-         samples_this_loop = freespace - samples;
++      if (samples_this_loop > freespace)
++         samples_this_loop = freespace;
+       
+-      memcpy(stream->output_buf + (samples * stream->bytes_per_sample),
++      result = sysdep_dsp_write(stream->dsp,
+          sample_buf->data + (sample_buf->pos * stream->bytes_per_sample),
+-         samples_this_loop * stream->bytes_per_sample);
+-         
+-      samples += samples_this_loop;
+-      sample_buf->pos += samples_this_loop;
++         samples_this_loop);
+       
++      /* woops something went wrong (EAGAIN ?!), try again next update */
++      if (result < 0)
++      {
++#ifdef SOUND_STREAM_WARNING
++         fprintf(stderr, "warning: sound_stream: sysdep_dsp_write returned -1\n");
++#endif
++         return;
++      }
++      
++      sample_buf->pos += result;
++      
++      /* was there enough space in the sound device to write the entire sample?
++         otherwise try again next update */
++      if (result < samples_this_loop)
++      {
++#ifdef SOUND_STREAM_WARNING
++         fprintf(stderr,
++            "warning: sound_stream: sysdep_dsp_write returned %d, expected %d\n",
++            result, samples_this_loop);
++#endif
++         return;
++      }
++         
+       /* is this sample_buf finished ? */
+       if(sample_buf->pos == sample_buf->length)
+       {
+@@ -231,7 +243,7 @@
+             sample_buf->pos = 0;
+          }
+       }
++      
++      freespace -= result;
+    }
+-   
+-   sysdep_dsp_write(stream->dsp, stream->output_buf, freespace);
+ }
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp.c xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp.c
+--- xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp.c	2000-03-20 06:12:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp.c	2023-11-23 14:43:53.288113400 -0500
+@@ -86,6 +86,9 @@
+ #ifdef SYSDEP_DSP_ESOUND
+    &sysdep_dsp_esound,
+ #endif
++#ifdef SYSDEP_DSP_ALSA /* RB: from xmame-37b7.1 */
++   &sysdep_dsp_alsa,
++#endif
+    NULL
+ };
+ 
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp.h xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp.h
+--- xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp.h	2000-03-14 17:14:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp.h	2023-11-23 14:44:00.752136487 -0500
+@@ -35,6 +35,7 @@
+ #define SYSDEP_DSP_EMULATE_TYPE 0x01
+ /* TODO: implement SYSDEP_DSP_EMULATE_SAMPLERATE */
+ /* #define SYSDEP_DSP_EMULATE_SAMPLERATE 0x02 */
++#define SYSDEP_DSP_O_NONBLOCK 0x04 /* RB: from xmame37-b7.1 */
+ 
+ struct sysdep_dsp_struct;
+ 
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp_plugins.h xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp_plugins.h
+--- xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp_plugins.h	2000-02-22 13:11:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp_plugins.h	2023-11-23 14:44:07.928161872 -0500
+@@ -42,6 +42,9 @@
+ #ifdef SYSDEP_DSP_ESOUND
+ extern struct plugin_struct sysdep_dsp_esound;
+ #endif
++#ifdef SYSDEP_DSP_ALSA
++extern struct plugin_struct sysdep_dsp_alsa; /* RB: from xmame-37b7.1 */
++#endif
+ 
+ #include "end_code.h"
+ #endif /* ifndef __SYSDEP_DSP_PLUGINS_H */
+diff -Naur xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp_priv.h xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp_priv.h
+--- xmame-0.37b1.2_org/src/unix/sysdep/sysdep_dsp_priv.h	2000-03-15 11:24:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/sysdep/sysdep_dsp_priv.h	2023-11-23 14:44:15.952193758 -0500
+@@ -46,6 +46,7 @@
+    const char *device;
+    int samplerate;
+    int type;
++   int flags; /* RB: from xmame-37b7.1 (does nothing) */ 
+ };
+ 
+ #include "end_code.h"
+diff -Naur xmame-0.37b1.2_org/src/unix/video-drivers/SDL.c xmame-0.37b1.2/src/unix/video-drivers/SDL.c
+--- xmame-0.37b1.2_org/src/unix/video-drivers/SDL.c	2000-02-22 02:33:00.000000000 -0500
++++ xmame-0.37b1.2/src/unix/video-drivers/SDL.c	2023-11-23 14:44:41.956319947 -0500
 @@ -539,6 +539,7 @@
  #ifdef SDL_DEBUG
              fprintf(stderr, "SDL: Debug: Other event\n");
@@ -1339,19 +2137,410 @@ diff -Naur xmame-0.37b1.2.org/src/unix/video-drivers/SDL.c xmame-0.37b1.2+++/src
           }
        }
     }
-diff -Naur xmame-0.37b1.2.org/src/usrintrf.c xmame-0.37b1.2+++/src/usrintrf.c
---- xmame-0.37b1.2.org/src/usrintrf.c	2000-04-15 11:33:03.000000000 -0500
-+++ xmame-0.37b1.2+++/src/usrintrf.c	2023-06-22 14:40:33.222359353 -0400
-@@ -12,6 +12,12 @@
+diff -Naur xmame-0.37b1.2_org/src/usrintrf.c xmame-0.37b1.2/src/usrintrf.c
+--- xmame-0.37b1.2_org/src/usrintrf.c	2000-04-15 12:33:03.000000000 -0400
++++ xmame-0.37b1.2/src/usrintrf.c	2023-11-23 15:26:51.729376726 -0500
+@@ -12,6 +12,10 @@
  #include "datafile.h"
  #include <stdarg.h>
  
-+///* 
-+#ifndef TINY_COMPILE
++#ifndef TINY_COMPILE /* RB: */
 +#define TINY_COMPILE
 +#endif
-+//*/
 +
  #ifdef MESS
    #include "mess/mess.h"
  #endif
+diff -Naur xmame-0.37b1.2_org/xmame_cb/xmame_cb.cbp xmame-0.37b1.2/xmame_cb/xmame_cb.cbp
+--- xmame-0.37b1.2_org/xmame_cb/xmame_cb.cbp	1969-12-31 19:00:00.000000000 -0500
++++ xmame-0.37b1.2/xmame_cb/xmame_cb.cbp	2023-11-22 19:51:16.159926295 -0500
+@@ -0,0 +1,389 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
++<CodeBlocks_project_file>
++	<FileVersion major="1" minor="6" />
++	<Project>
++		<Option title="xmame_cb" />
++		<Option pch_mode="2" />
++		<Option compiler="gcc" />
++		<Build>
++			<Target title="Debug">
++				<Option output="bin/Debug/xmame_cb" prefix_auto="1" extension_auto="1" />
++				<Option object_output="obj/Debug/" />
++				<Option type="1" />
++				<Option compiler="gcc" />
++				<Option parameters="pacman -rompath ." />
++				<Compiler>
++					<Add option="-g" />
++				</Compiler>
++			</Target>
++			<Target title="Release">
++				<Option output="bin/Release/xmame_cb" prefix_auto="1" extension_auto="1" />
++				<Option object_output="obj/Release/" />
++				<Option type="1" />
++				<Option compiler="gcc" />
++				<Compiler>
++					<Add option="-O2" />
++				</Compiler>
++				<Linker>
++					<Add option="-s" />
++				</Linker>
++			</Target>
++		</Build>
++		<Compiler>
++			<Add option="-Wall" />
++			<Add option='-DINLINE=&quot;static __inline__&quot;' />
++			<Add option="-DLSB_FIRST" />
++			<Add option="-Dx11" />
++			<Add option="-Dstricmp=strcasecmp" />
++			<Add option="-Dstrnicmp=strncasecmp" />
++			<Add option="-DUNIX" />
++			<Add option="-DHAS_NAMCO" />
++			<Add option="-DHAS_NAMCO_52XX" />
++			<Add option="-DHAS_NAMCO_54XX" />
++			<Add option="-DHAS_SAMPLES" />
++			<Add option="-DHAS_Z80" />
++			<Add option="-DHAS_SN76496=1" />
++			<Add option="-DHAS_AY8910=1" />
++			<Add option='-DNAME=\&apos;&quot;xmame&quot;\&apos;' />
++			<Add option='-DDISPLAY_METHOD=\&apos;&quot;x11&quot;\&apos;' />
++			<Add option='-DXMAMEROOT=\&apos;&quot;/usr/local/share/xmame&quot;\&apos;' />
++			<Add option='-DSYSCONFDIR=\&apos;&quot;/usr/local/share/xmame&quot;\&apos;' />
++			<Add option="-DUSE_MITSHM=1" />
++			<Add option="-DSYSDEP_DSP_ALSA" />
++			<Add option="-DSOUND_ALSA=1" />
++			<Add option="-DHAVE_GETTIMEOFDAY=1" />
++			<Add directory="../src" />
++			<Add directory="../src/unix" />
++			<Add directory="../src/includes" />
++		</Compiler>
++		<Linker>
++			<Add library="z" />
++			<Add library="expat" />
++			<Add library="m" />
++			<Add library="asound" />
++			<Add library="Xext" />
++			<Add library="X11" />
++			<Add library="Xv" />
++		</Linker>
++		<Unit filename="../src/artwork.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/artwork.h" />
++		<Unit filename="../src/audit.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/audit.h" />
++		<Unit filename="../src/chd.h" />
++		<Unit filename="../src/cheat.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/cheat.h" />
++		<Unit filename="../src/common.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/common.h" />
++		<Unit filename="../src/config.h" />
++		<Unit filename="../src/cpu/z80/z80.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/cpu/z80/z80.h" />
++		<Unit filename="../src/cpuexec.h" />
++		<Unit filename="../src/cpuint.h" />
++		<Unit filename="../src/cpuintrf.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/cpuintrf.h" />
++		<Unit filename="../src/datafile.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/datafile.h" />
++		<Unit filename="../src/drawgfx.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/drawgfx.h" />
++		<Unit filename="../src/driver.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/driver.h" />
++		<Unit filename="../src/drivers/dkong.c">
++			<Option compilerVar="CC" />
++			<Option compile="0" />
++			<Option link="0" />
++		</Unit>
++		<Unit filename="../src/drivers/pacman.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/fileio.h" />
++		<Unit filename="../src/gfxobj.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/gfxobj.h" />
++		<Unit filename="../src/hash.h" />
++		<Unit filename="../src/hiscore.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/hiscore.h" />
++		<Unit filename="../src/includes/pacman.h" />
++		<Unit filename="../src/info.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/info.h" />
++		<Unit filename="../src/inptport.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/inptport.h" />
++		<Unit filename="../src/input.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/input.h" />
++		<Unit filename="../src/machine/atari_vg.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/machine/atari_vg.h" />
++		<Unit filename="../src/machine/eeprom.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/machine/eeprom.h" />
++		<Unit filename="../src/machine/namcoio.h" />
++		<Unit filename="../src/machine/pacman.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/machine/pacplus.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/machine/theglob.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/machine/xevious.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/mame.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/mame.h" />
++		<Unit filename="../src/md5.h" />
++		<Unit filename="../src/memory.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/memory.h" />
++		<Unit filename="../src/palette.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/palette.h" />
++		<Unit filename="../src/png.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/png.h" />
++		<Unit filename="../src/profiler.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/profiler.h" />
++		<Unit filename="../src/sha1.h" />
++		<Unit filename="../src/sndintrf.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sndintrf.h" />
++		<Unit filename="../src/sound/ay8910.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/ay8910.h" />
++		<Unit filename="../src/sound/filter.h" />
++		<Unit filename="../src/sound/mixer.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/mixer.h" />
++		<Unit filename="../src/sound/namco.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/namco.h" />
++		<Unit filename="../src/sound/namco52.h" />
++		<Unit filename="../src/sound/namco54.h" />
++		<Unit filename="../src/sound/samples.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/samples.h" />
++		<Unit filename="../src/sound/sn76496.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/sn76496.h" />
++		<Unit filename="../src/sound/streams.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sound/streams.h" />
++		<Unit filename="../src/sprite.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/sprite.h" />
++		<Unit filename="../src/state.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/state.h" />
++		<Unit filename="../src/tilemap.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/tilemap.h" />
++		<Unit filename="../src/timer.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/timer.h" />
++		<Unit filename="../src/ui_text.c">
++			<Option compilerVar="CC" />
++			<Option compile="0" />
++			<Option link="0" />
++		</Unit>
++		<Unit filename="../src/ui_text.h" />
++		<Unit filename="../src/unix/config.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/debug.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/devices.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/devices.h" />
++		<Unit filename="../src/unix/dirio.c">
++			<Option compilerVar="CC" />
++			<Option compile="0" />
++			<Option link="0" />
++		</Unit>
++		<Unit filename="../src/unix/dirty.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/effect.h" />
++		<Unit filename="../src/unix/effect_funcs.h" />
++		<Unit filename="../src/unix/fileio.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/frameskip-drivers/barath.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/frameskip-drivers/dos.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/fronthlp.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/ident.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/joystick-drivers/joy_i386.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/joystick-drivers/joy_pad.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/joystick-drivers/joy_usb.c">
++			<Option compilerVar="CC" />
++			<Option compile="0" />
++			<Option link="0" />
++		</Unit>
++		<Unit filename="../src/unix/joystick-drivers/joy_x11.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/keyboard.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/keyboard.h" />
++		<Unit filename="../src/unix/main.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/mode.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/network.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sound.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/dsp-drivers/alsa.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/misc.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/misc.h" />
++		<Unit filename="../src/unix/sysdep/plugin_manager.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/plugin_manager.h" />
++		<Unit filename="../src/unix/sysdep/rc.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/rc.h" />
++		<Unit filename="../src/unix/sysdep/sound_stream.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/sound_stream.h" />
++		<Unit filename="../src/unix/sysdep/sysdep_dsp.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/sysdep_dsp.h" />
++		<Unit filename="../src/unix/sysdep/sysdep_mixer.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/sysdep_mixer.h" />
++		<Unit filename="../src/unix/sysdep/sysdep_palette.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/sysdep/sysdep_palette.h" />
++		<Unit filename="../src/unix/ticker.h" />
++		<Unit filename="../src/unix/video-drivers/x11.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/video-drivers/x11.h" />
++		<Unit filename="../src/unix/video-drivers/x11_window.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/video-drivers/xf86_dga.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/video-drivers/xinput.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unix/video.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unzip.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/unzip.h" />
++		<Unit filename="../src/usrintrf.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/usrintrf.h" />
++		<Unit filename="../src/version.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/avgdvg.c">
++			<Option compilerVar="CC" />
++			<Option target="&lt;{~None~}&gt;" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/avgdvg.h" />
++		<Unit filename="../src/vidhrdw/bosco.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/digdug.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/galaga.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/generic.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/generic.h" />
++		<Unit filename="../src/vidhrdw/pengo.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/vector.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Unit filename="../src/vidhrdw/vector.h" />
++		<Unit filename="../src/vidhrdw/xevious.c">
++			<Option compilerVar="CC" />
++		</Unit>
++		<Extensions />
++	</Project>
++</CodeBlocks_project_file>
